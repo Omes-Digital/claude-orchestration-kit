@@ -44,6 +44,10 @@ dates matter more than version numbers.
 - **Curated vendored skills (23 → 15)** — pruned the redistributed community skills to a high-signal set
   (dropped 8: duplicates of the kit's own merged supersets, dispatch/review overlaps, and niche skills),
   updating counts + `THIRD_PARTY_LICENSES.md` attribution.
+- `ab-test/parallel-fanout/` (new) — a fourth A/B task probing the regime the other three couldn't: six
+  genuinely independent formatters built **concurrently** (System fans out 6 agents; Vanilla does them in
+  sequence). The fair test of whether orchestration wins **wall-clock** when work parallelizes — the upside
+  FINDINGS flagged as untested.
 
 ### Added — orchestrator features
 - Three small **sub-agent skills** for the cheap implementer tier (own skills now total **eight**):

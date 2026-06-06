@@ -29,6 +29,7 @@ file's `COST_USD` line, and note the wall-clock.
 | `expense-tracker/` | A small multi-file CLI expense tracker + tests | greenfield · warm-up | sanity-check the harness; small enough that the kit may *not* pay off |
 | `calculator/` | A `calc` expression language (lexer → parser → evaluator) + tests | greenfield · complex | real cross-file invariants + tricky correctness (precedence, right-assoc, error paths) |
 | `existing-repo/` | Add due-dates **end-to-end** to a pre-seeded existing layered todo app | **cross-cutting · existing code** | the regime the kit is *actually built for* — a change spread across an existing multi-file codebase where a single pass can drop a layer (storage round-trip, legacy back-compat) or cause a regression. The greenfield tasks above are the regime *least* favorable to orchestration; this is the fair test of its real claim. |
+| `parallel-fanout/` | Six **independent** output formatters, built concurrently | **parallel · fan-out** | the case the other three *couldn't* test — genuinely independent units with no shared state, where the System arm fans out 6 agents in parallel and Vanilla does them in sequence. Here orchestration *should* win **wall-clock**. The fair test of orchestration's **upside** (the others probe its downside). |
 
 **Verify the flag first:** `claude --bare` is the cleanest vanilla baseline — confirm it exists with
 `claude --help`. If it doesn't, temporarily move your kit files aside instead
