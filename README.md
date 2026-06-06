@@ -16,6 +16,12 @@ The idea: keep a frontier model (Opus) as the **architect** doing design, contra
 | `skills/diagnose/` | Disciplined root-cause diagnosis loop for hard bugs. |
 | `skills/review-diff/` | Multi-axis code-review rubric with a confidence gate. |
 | `agent-memory/` | Pre-seeded per-role global memory (`architect`, `explorer`, `researcher`, `implementer`, `reviewer`, `auditor`, `memory-curator`) + the framework README. |
+| `vendor/mattpocock/` | 9 skills vendored unmodified from [`mattpocock/skills`](https://github.com/mattpocock/skills) (MIT). |
+| `vendor/superpowers/` | 14 skills vendored unmodified from [`obra/superpowers`](https://github.com/obra/superpowers) (MIT). |
+
+> The `vendor/` skills are third-party MIT-licensed work redistributed with their original
+> license + attribution — see [`THIRD_PARTY_LICENSES.md`](THIRD_PARTY_LICENSES.md). They are
+> optional companions to the framework; install the ones you want (see `INSTALL.md`).
 
 ## The core idea in one diagram
 
@@ -43,7 +49,8 @@ See [`INSTALL.md`](INSTALL.md). Short version: copy `CLAUDE.md`, `agents/`, `ski
 ## Design notes / credits
 
 - Tiering + strict-mode executor rules follow the *Plan → Execute → Review* pipeline (review always returns to a more-capable tier; never self-review).
-- The bundled skills are best-of-each merges of community skill packs (Matt Pocock, superpowers / Jesse Vincent, Addy Osmani) and Anthropic's `pr-review-toolkit`.
+- The four top-level skills are best-of-each merges of community skill packs (Matt Pocock, superpowers / Jesse Vincent, Addy Osmani) and Anthropic's `pr-review-toolkit`.
+- The `vendor/` skills are redistributed **unmodified** from [`mattpocock/skills`](https://github.com/mattpocock/skills) and [`obra/superpowers`](https://github.com/obra/superpowers), both MIT — full attribution in [`THIRD_PARTY_LICENSES.md`](THIRD_PARTY_LICENSES.md). All credit for those goes to their respective authors.
 - The memory layer is grounded in CoALA (episodic/semantic/procedural), Cline's Memory Bank, and Anthropic's context-engineering guidance.
 
 This is a personalization layer, not a product — read it, take what fits your workflow, and adapt the rest.

@@ -32,6 +32,22 @@ mkdir -p ~/.claude/agent-memory
 cp -r agent-memory/* ~/.claude/agent-memory/
 ```
 
+### Optional: the vendored companion skills
+
+`vendor/` holds third-party MIT-licensed skills (from [`mattpocock/skills`](https://github.com/mattpocock/skills)
+and [`obra/superpowers`](https://github.com/obra/superpowers)) redistributed unmodified. Copy the ones you want
+straight into your skills dir:
+
+```bash
+# all of them:
+cp -r vendor/mattpocock/*/  ~/.claude/skills/   2>/dev/null
+cp -r vendor/superpowers/*/ ~/.claude/skills/   2>/dev/null
+# (the */ glob skips the LICENSE files, copying only skill directories)
+```
+
+Prefer to track upstream and get updates? Install them as plugins from the source repos instead of
+copying — see each repo's README. Either way, keep the attribution intact (see `THIRD_PARTY_LICENSES.md`).
+
 ## 3. Enable Workflows (optional but recommended)
 
 The `dispatch` skill and parallel fan-out lean on the Workflow tool. In `~/.claude/settings.json`:
