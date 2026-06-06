@@ -13,11 +13,11 @@ dates matter more than version numbers.
   PASS/FAIL evidence block + a memory proposal). Distilled from the implementer agent-def rules into
   discrete, on-demand skills.
 - `scripts/statusline.sh` and `scripts/statusline.ps1` — an **opt-in** Claude Code status line showing live
-  context use (`ctx NN% · Nk`) with a `/compact` nudge. The nudge is **token-first** and **model-aware**: the
-  Opus architect is kept leaner than the cheaper tiers (Opus ~80k / 40%, other models ~120k / 60%), firing on
-  absolute context tokens or window %, whichever first — token-first because % is window-relative (40% of a
-  1M-context model is ~400k tokens). Override with `KIT_COMPACT_TOKENS` / `KIT_COMPACT_AT`. Installed to
-  `~/.claude/scripts/`; enable it in `settings.json` (see `INSTALL.md` §2). Not turned on automatically.
+  context use (`ctx NN% · Nk`) with a **model-aware** `/compact` nudge by window %: the Opus architect nudges
+  earlier (40%) than the cheaper tiers (60%). Because % is window-relative, 40% is ~80k tokens on a 200k model
+  but ~400k on a 1M-context one. Optional absolute-token cap via `KIT_COMPACT_TOKENS` (off by default); percent
+  override via `KIT_COMPACT_AT`. Installed to `~/.claude/scripts/`; enable it in `settings.json` (see
+  `INSTALL.md` §2). Not turned on automatically.
 - `CLAUDE.md` — a "Context hygiene" section: recommend `/compact` at work-cluster breakpoints (not at a
   magic token number the model can't read) to keep the architect session lean.
 - `install.sh --uninstall` / `install.ps1 -Uninstall` — a clean removal path. Dry-run by default (previews

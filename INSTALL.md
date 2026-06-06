@@ -125,13 +125,12 @@ The example deliberately omits personal plugin/marketplace config — add your o
 
 The installer drops `statusline.sh` / `statusline.ps1` into `~/.claude/scripts/` but does **not** turn them
 on. They render a one-line status bar — `model · dir (branch) · ctx NN% · Nk` — and the `ctx` figure turns
-yellow with a `⚠ /compact` nudge. Defaults are **model-aware** — the Opus architect is kept leaner than the
-cheaper tiers: **Opus** nudges at ~80k tokens / 40%, **other models** at ~120k tokens / 60%. It fires on
-whichever comes first, **absolute tokens** or **window %**, and is token-first because the % is relative to
-your model's window (40% of a 200k window is 80k tokens, but 40% of a 1M-context model is ~400k — so on
-big-window models the token trigger keeps you lean). Override for all models with the env vars
-`KIT_COMPACT_TOKENS` and `KIT_COMPACT_AT`. This is the "real number" companion to the
-`/compact`-at-breakpoints habit in `CLAUDE.md` → *Context hygiene*.
+yellow with a `⚠ /compact` nudge. Defaults are **model-aware window %** — the Opus architect nudges earlier
+than the cheaper tiers: **Opus at 40%**, **other models at 60%** of the context window. Because % is relative
+to your model's window, 40% means ~80k tokens on a 200k model but ~400k on a 1M-context one — so a big-window
+Opus gets lots of headroom before it warns. If you'd rather nudge by absolute size, set `KIT_COMPACT_TOKENS`
+(off by default; it then also warns at that token count); override the percent with `KIT_COMPACT_AT`. This is
+the "real number" companion to the `/compact`-at-breakpoints habit in `CLAUDE.md` → *Context hygiene*.
 
 To enable it, add a `statusLine` key to `~/.claude/settings.json` and **restart Claude Code**:
 

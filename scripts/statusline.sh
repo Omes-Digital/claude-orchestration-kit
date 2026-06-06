@@ -11,13 +11,13 @@
 #
 # Needs `jq` (for parsing the status JSON). Without it, prints a hint instead of failing.
 #
-# The /compact nudge fires on EITHER trigger (whichever hits first), with MODEL-AWARE defaults —
-# the Opus architect is kept leaner than the cheaper implementer tiers:
-#   Opus           ~80k tokens  or 40% of window
-#   other models  ~120k tokens  or 60% of window
-# Override either, for all models, with env vars:
-#   KIT_COMPACT_TOKENS=N   absolute context tokens (the real "stay lean" signal; correct on any window)
-#   KIT_COMPACT_AT=N       percent of the window (note 40% of a 1M-context model is ~400k tokens)
+# The /compact nudge fires by WINDOW PERCENT, with MODEL-AWARE defaults — the Opus architect nudges
+# earlier than the cheaper implementer tiers:
+#   Opus           40% of window
+#   other models  60% of window
+# Note % is window-relative: on a 1M-context model, 40% ≈ 400k tokens (lots of headroom). If you'd rather
+# cap by absolute size, set KIT_COMPACT_TOKENS (off by default) — it then ALSO nudges at that token count.
+# Override the percent for all models with KIT_COMPACT_AT.
 #
 set -u
 
@@ -35,15 +35,14 @@ toks=$(printf '%s' "$input"   | jq -r '.context_window.total_input_tokens // emp
 dir_base=${dir##*/}
 branch=$(git -C "$dir" rev-parse --abbrev-ref HEAD 2>/dev/null || true)
 
-# model-aware nudge defaults — keep the architect (Opus) leaner than the cheaper tiers; env vars
-# override both. The token + % defaults agree on a 200k window (80k≈40%, 120k≈60%), and the token
-# trigger keeps a big window (Opus 1M) honest too.
+# model-aware nudge — the Opus architect nudges earlier (40% of window) than the cheaper tiers (60%).
+# Percent governs by default; KIT_COMPACT_TOKENS adds an optional absolute-token nudge on top.
 case "$model" in
-  *[Oo]pus*) def_pct=40; def_tok=80000 ;;
-  *)         def_pct=60; def_tok=120000 ;;
+  *[Oo]pus*) def_pct=40 ;;
+  *)         def_pct=60 ;;
 esac
 PCT_AT="${KIT_COMPACT_AT:-$def_pct}"
-TOK_AT="${KIT_COMPACT_TOKENS:-$def_tok}"
+TOK_AT="${KIT_COMPACT_TOKENS:-}"   # absolute-token nudge is opt-in; empty = percent governs alone
 
 line="$model"
 [ -n "$dir_base" ] && line="$line · $dir_base"
@@ -60,8 +59,8 @@ fi
 
 # nudge on EITHER trigger: absolute tokens (primary) or window % (backstop)
 warn=0
-[ -n "$toks" ]    && [ "${toks:-0}"    -ge "$TOK_AT" ] 2>/dev/null && warn=1
-[ -n "$pct_int" ] && [ "${pct_int:-0}" -ge "$PCT_AT" ] 2>/dev/null && warn=1
+[ -n "$TOK_AT" ] && [ -n "$toks" ] && [ "${toks:-0}" -ge "$TOK_AT" ] 2>/dev/null && warn=1
+[ -n "$pct_int" ]                  && [ "${pct_int:-0}" -ge "$PCT_AT" ] 2>/dev/null && warn=1
 
 if [ -n "$ctx" ]; then
   if [ "$warn" -eq 1 ]; then

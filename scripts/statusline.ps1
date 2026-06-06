@@ -10,11 +10,12 @@
 #   "statusLine": { "type": "command", "command": "pwsh -File ~/.claude/scripts/statusline.ps1", "padding": 1 }
 # then restart Claude Code. See INSTALL.md §2 and docs/FAQ.md.
 #
-# The /compact nudge fires on EITHER trigger (whichever first), with MODEL-AWARE defaults —
-# the Opus architect is kept leaner than the cheaper implementer tiers:
-#   Opus           ~80k tokens  or 40% of window
-#   other models  ~120k tokens  or 60% of window
-# Override for all models:  $env:KIT_COMPACT_TOKENS = N   /   $env:KIT_COMPACT_AT = N
+# The /compact nudge fires by WINDOW PERCENT, with MODEL-AWARE defaults — the Opus architect nudges
+# earlier than the cheaper implementer tiers:
+#   Opus           40% of window
+#   other models  60% of window
+# Note % is window-relative: on a 1M-context model 40% ≈ 400k tokens. To cap by absolute size instead,
+# set $env:KIT_COMPACT_TOKENS (off by default). Override the percent with $env:KIT_COMPACT_AT.
 #
 $ErrorActionPreference = 'SilentlyContinue'
 
@@ -29,10 +30,11 @@ $pct     = $j.context_window.used_percentage
 $toks    = $j.context_window.total_input_tokens
 $branch  = & git -C $dir rev-parse --abbrev-ref HEAD 2>$null
 
-# model-aware nudge defaults — keep the Opus architect leaner than the cheaper tiers; env vars override
-if ($model -match '(?i)opus') { $defPct = 40; $defTok = 80000 } else { $defPct = 60; $defTok = 120000 }
+# model-aware nudge — the Opus architect nudges earlier (40% of window) than the cheaper tiers (60%).
+# Percent governs by default; KIT_COMPACT_TOKENS adds an optional absolute-token nudge on top.
+if ($model -match '(?i)opus') { $defPct = 40 } else { $defPct = 60 }
 $thresholdPct = if ($env:KIT_COMPACT_AT)     { [int]$env:KIT_COMPACT_AT }     else { $defPct }
-$thresholdTok = if ($env:KIT_COMPACT_TOKENS) { [int]$env:KIT_COMPACT_TOKENS } else { $defTok }
+$thresholdTok = if ($env:KIT_COMPACT_TOKENS) { [int]$env:KIT_COMPACT_TOKENS } else { $null }
 
 $line = $model
 if ($dirBase) { $line += " · $dirBase" }
@@ -49,7 +51,7 @@ if ($null -ne $toks -and "$toks" -ne '') {
 
 # nudge on EITHER trigger: absolute tokens (primary) or window % (backstop)
 $warn = $false
-if ($null -ne $toks -and "$toks" -ne '' -and [double]$toks -ge $thresholdTok) { $warn = $true }
+if ($null -ne $thresholdTok -and $null -ne $toks -and "$toks" -ne '' -and [double]$toks -ge $thresholdTok) { $warn = $true }
 if ($null -ne $pi -and $pi -ge $thresholdPct) { $warn = $true }
 
 if ($ctx) {
