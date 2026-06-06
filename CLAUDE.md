@@ -3,6 +3,9 @@
 > Drop-in agent-orchestration layer for Claude Code. Put this file at `~/.claude/CLAUDE.md`
 > (or paste the section below into your existing one). It pairs with the `agents/`,
 > `skills/`, and `agent-memory/` directories in this bundle. See `INSTALL.md`.
+>
+> **New here?** This file shapes how Claude behaves in *every* project. Adopt it deliberately —
+> see `START-HERE.md` (Level 2), and start with just a skill or two if you're not ready for that.
 
 ## Agent Orchestration — tier by task weight
 

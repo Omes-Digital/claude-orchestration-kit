@@ -1,101 +1,169 @@
 # Install
 
-This kit lives in your **user-level** Claude Code config at `~/.claude/`, so it applies in every project.
+This kit lives in your **user-level** Claude Code config folder, so it applies in every project:
+- **macOS / Linux:** `~/.claude/`
+- **Windows:** `%USERPROFILE%\.claude\` (e.g. `C:\Users\You\.claude`) — in PowerShell, `~\.claude`
 
-## 1. Back up your existing config (if any)
+> New to all this? Read [`START-HERE.md`](START-HERE.md) first — it has a 5-minute path.
+
+## 0. Prerequisites
+
+- **[Claude Code](https://claude.com/claude-code) installed** (the CLI). Follow the official install docs
+  for your platform; this kit only adds config files, it doesn't install Claude Code itself.
+- An **Anthropic account / plan.** The architect→implementer *tiering* assumes you can use more than one
+  model (Opus to design, Sonnet/Haiku to execute) — but that's an **optimization, not a requirement.**
+  Every skill and the playbook work on a single model. No Opus? Use **Sonnet** and ignore the tier advice.
+- **You'll restart Claude Code** after installing, so it picks up the new skills and agents.
+
+## 1. Install
+
+### Option A — the installer (recommended)
+
+From the repo root:
 
 ```bash
-cp -r ~/.claude ~/.claude.backup-$(date +%Y%m%d)
+# macOS / Linux
+bash install.sh                # core: CLAUDE.md + agents + 5 own skills + memory seeds
+bash install.sh --all          # also install the 23 vendored community skills
+```
+```powershell
+# Windows PowerShell
+pwsh -File install.ps1          # core
+pwsh -File install.ps1 -All     # also the vendored community skills
 ```
 
-## 2. Copy the pieces in
+The installer:
+- **backs up** anything it overwrites into `~/.claude/.kit-backup-<timestamp>/`,
+- **never clobbers your own `CLAUDE.md`** — if you already have one, it writes the kit's playbook to
+  `CLAUDE.orchestration.md` instead and tells you to merge,
+- is **idempotent** (safe to re-run),
+- supports `--check` / `-Check` to verify without changing anything (see [§3](#3-verify)).
 
-From the root of this repo:
+> Want only the community skills, not the core? Use `--with-vendor` / `-WithVendor`.
+
+### Option B — manual copy
+
+If you'd rather copy by hand, pick your platform.
+
+<details>
+<summary><b>macOS / Linux</b></summary>
 
 ```bash
-# the orchestration framework
-#  - if you have NO existing ~/.claude/CLAUDE.md, just copy it:
+# (optional) back up first
+cp -r ~/.claude "$HOME/.claude.backup-$(date +%Y%m%d)" 2>/dev/null || true
+
+# the playbook — if you have NO existing ~/.claude/CLAUDE.md:
 cp CLAUDE.md ~/.claude/CLAUDE.md
-#  - if you DO, open both and paste the "## Agent Orchestration" section
-#    into your existing file instead of overwriting it.
+#  - if you DO have one, copy to CLAUDE.orchestration.md and merge the
+#    "## Agent Orchestration" section into your existing file instead.
 
-# the implementer sub-agents
-mkdir -p ~/.claude/agents
-cp agents/*.md ~/.claude/agents/
+mkdir -p ~/.claude/agents       && cp agents/*.md ~/.claude/agents/
+mkdir -p ~/.claude/skills       && cp -r skills/* ~/.claude/skills/
+mkdir -p ~/.claude/agent-memory && cp -r agent-memory/* ~/.claude/agent-memory/
 
-# the bundled own skills (align, dispatch, tdd, diagnose, review-diff)
-mkdir -p ~/.claude/skills
-cp -r skills/* ~/.claude/skills/
-
-# pre-seeded per-role agent memory
-mkdir -p ~/.claude/agent-memory
-cp -r agent-memory/* ~/.claude/agent-memory/
+# optional: the vendored community skills (the */ glob skips the LICENSE files)
+cp -r vendor/mattpocock/*/  ~/.claude/skills/ 2>/dev/null
+cp -r vendor/superpowers/*/ ~/.claude/skills/ 2>/dev/null
 ```
+</details>
 
-### Optional: the vendored companion skills
+<details>
+<summary><b>Windows (PowerShell)</b></summary>
 
-`vendor/` holds third-party MIT-licensed skills (from [`mattpocock/skills`](https://github.com/mattpocock/skills)
-and [`obra/superpowers`](https://github.com/obra/superpowers)) redistributed unmodified. Copy the ones you want
-straight into your skills dir:
+```powershell
+$claude = Join-Path $HOME '.claude'
 
-```bash
-# all of them:
-cp -r vendor/mattpocock/*/  ~/.claude/skills/   2>/dev/null
-cp -r vendor/superpowers/*/ ~/.claude/skills/   2>/dev/null
-# (the */ glob skips the LICENSE files, copying only skill directories)
+# the playbook — if you have NO existing CLAUDE.md:
+Copy-Item -Force CLAUDE.md (Join-Path $claude 'CLAUDE.md')
+#  - if you DO have one, copy it to CLAUDE.orchestration.md and merge the
+#    "## Agent Orchestration" section into your existing file instead.
+
+New-Item -ItemType Directory -Force (Join-Path $claude 'agents')       | Out-Null
+Copy-Item -Force agents\*.md (Join-Path $claude 'agents')
+New-Item -ItemType Directory -Force (Join-Path $claude 'skills')       | Out-Null
+Copy-Item -Recurse -Force skills\* (Join-Path $claude 'skills')
+New-Item -ItemType Directory -Force (Join-Path $claude 'agent-memory') | Out-Null
+Copy-Item -Recurse -Force agent-memory\* (Join-Path $claude 'agent-memory')
+
+# optional: the vendored community skills
+Get-ChildItem -Directory vendor\mattpocock, vendor\superpowers |
+  Where-Object { Test-Path (Join-Path $_.FullName 'SKILL.md') } |
+  ForEach-Object { Copy-Item -Recurse -Force $_.FullName (Join-Path $claude 'skills') }
 ```
+</details>
 
-Prefer to track upstream and get updates? Install them as plugins from the source repos instead of
-copying — see each repo's README. Either way, keep the attribution intact (see `THIRD_PARTY_LICENSES.md`).
+### A note on `align`'s companions
 
-> **`align` depends on three companion skills.** The `align` skill (in `skills/`) hands off to
-> `dispatch` and invokes `caveman` and `grill-me` as part of its flow. `dispatch` ships in `skills/`;
-> `caveman` and `grill-me` live in `vendor/mattpocock/`. To get the full chain working, install those
-> two vendored skills (or all of them, above). Without them, `align` still runs but its `/caveman` and
-> `grill-me` steps will no-op.
+The `align` skill hands off to `dispatch` (ships in `skills/`) and invokes `caveman` and `grill-me`
+(in `vendor/mattpocock/`). For the full chain, install the vendored skills too (`--all` / `-All` covers
+them). Without them, `align` still runs — those steps just no-op.
 
-## 3. Enable Workflows (optional but recommended)
+## 2. Settings
 
-The `dispatch` skill and parallel fan-out lean on the Workflow tool. In `~/.claude/settings.json`:
-
-```json
-{
-  "enableWorkflows": true
-}
-```
-
-A minimal, shareable `settings.json` baseline (merge into yours — don't blindly overwrite, and never commit secrets / personal paths):
+Copy [`settings.example.json`](settings.example.json) to `~/.claude/settings.json` (merge it into yours if
+you already have one — **don't blindly overwrite**, and never commit secrets / personal paths):
 
 ```json
 {
   "permissions": {
     "allow": ["WebSearch", "WebFetch"],
-    "defaultMode": "auto"
+    "defaultMode": "default"
   },
   "enableWorkflows": true
 }
 ```
 
-## 4. Verify
+What each key does:
+- **`permissions.allow`** — tools Claude may use without asking each time (`WebSearch`/`WebFetch` are safe).
+- **`defaultMode`** — how cautious Claude is. `"default"` asks before edits/commands (**recommended while
+  you learn**); switch to `"auto"` once you trust the setup.
+- **`enableWorkflows`** — turns on the Workflow tool that `dispatch` and parallel fan-out use.
 
-Start Claude Code in any project and check:
+The example deliberately omits personal plugin/marketplace config — add your own if you use plugins.
 
+## 3. Verify
+
+**Doctor (files on disk):**
+```bash
+bash install.sh --check          # macOS / Linux
 ```
-/agents     →  implementer-sonnet and implementer-haiku should be listed
-/skills     →  dispatch, tdd, diagnose, review-diff should be listed
+```powershell
+pwsh -File install.ps1 -Check    # Windows
+```
+It prints ✓/✗ for each expected file. Add `--all` / `-All` to also check the vendored skills.
+
+**In Claude Code (after restarting):**
+```
+/agents     →  implementer-sonnet and implementer-haiku listed
+/skills     →  align, dispatch, tdd, diagnose, review-diff listed
 ```
 
-Then try the loop: ask Opus to design something small, then say **"dispatch this"** — it should write a strict-mode contract and hand the bounded work to an implementer tier.
+Then try the loop: ask Claude to design something small, then say **"dispatch this"** — it should write a
+strict-mode contract and hand the bounded work to an implementer tier. See the
+[worked example](docs/EXAMPLE.md).
 
 ## How it's meant to be used
 
-1. **Design on Opus.** Keep the architect (this session) for design, contracts, cross-file judgement, and triage.
-2. **Dispatch bounded work down.** `dispatch` writes the contract (file list · exact change · deny-list · verification command) and picks the tier — `implementer-haiku` for single-file mechanical edits, `implementer-sonnet` for multi-file / cross-file / schema-risk work.
-3. **Review comes back up.** Never let a tier review its own work — `code-review` / `review-diff` run in the architect session before the human's push moment.
-4. **Memory accrues.** Agents propose durable learnings; the architect promotes keepers into `agent-memory/<role>/MEMORY.md`. Keep each file short.
+1. **Align first.** For anything ambiguous, `/align` nails down the brief before any work.
+2. **Design on your strongest model.** Keep the architect session for design, contracts, and triage.
+3. **Dispatch bounded work down.** `dispatch` writes the contract (files · change · deny-list · verify) and
+   picks the tier — `implementer-haiku` for single-file mechanical edits, `implementer-sonnet` for
+   multi-file / cross-file / schema-risk work.
+4. **Review comes back up.** Never let a tier review its own work — `review-diff` / `/code-review` run in
+   the architect session before the human's push moment.
+5. **Memory accrues.** Agents propose durable learnings; you promote keepers into
+   `agent-memory/<role>/MEMORY.md`. Keep each file short.
+
+## Uninstall
+
+Delete what you added under `~/.claude/`: the skill folders, `agents/implementer-*.md`, `agent-memory/`,
+and `CLAUDE.md` (or `CLAUDE.orchestration.md`). Restore anything you want back from the
+`.kit-backup-<timestamp>/` folder the installer made. Restart Claude Code.
 
 ## Notes
 
 - **No secrets or personal data** are included in this kit. The agent-memory seeds are generic craft.
-- The bundled skills are *additive* — they don't replace Claude Code's built-in `/code-review`, `/security-review`, etc.; they complement them.
-- If you use community skill plugins (Matt Pocock, pr-review-toolkit, etc.), the bundled `tdd` / `diagnose` are merged supersets — prefer them and disable the redundant plugin duplicates if the descriptions add noise.
+- The bundled skills are *additive* — they complement Claude Code's built-in `/code-review`,
+  `/security-review`, etc., they don't replace them.
+- If you use community skill plugins (Matt Pocock, pr-review-toolkit, etc.), the bundled `tdd` / `diagnose`
+  are merged supersets — prefer them and disable redundant plugin duplicates if the descriptions add noise.
