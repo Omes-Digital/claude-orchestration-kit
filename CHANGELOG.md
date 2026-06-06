@@ -26,10 +26,12 @@ dates matter more than version numbers.
 
 ### Added — measure it yourself
 - `ab-test/` — a self-run A/B harness to test the kit against a vanilla session on the *same* task and
-  compare cost / wall-clock / quality on your own setup. `RUN-system.md` and `RUN-vanilla.md` are
-  self-contained (paste one file's path into a fresh chat; it does the task under that condition and writes
-  its scorecard); `COMPARE.md` reads both and gives an honest verdict (explicitly told not to flatter the
-  kit). `result-*.md` outputs are git-ignored. Built deliberately honest — one run is an anecdote, not proof.
+  compare cost / wall-clock / quality on your own setup. Each task is a folder with self-contained
+  `RUN-system.md`, `RUN-vanilla.md` (paste one file's path into a fresh chat; it does the task under that
+  condition and writes its scorecard) and `COMPARE.md` (reads both, gives an honest verdict — explicitly told
+  not to flatter the kit). Ships two tasks: `expense-tracker/` (warm-up) and `calculator/` (a lexer→parser→
+  evaluator expression language — complex, real cross-file invariants, where the kit's edge should show if it
+  exists). `result-*.md` outputs are git-ignored. Built deliberately honest — one run is an anecdote, not proof.
 
 ### Added — beginner on-ramp
 - `START-HERE.md` — single entry point with a 3-level progressive adoption path (try one skill → add the
