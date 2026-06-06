@@ -61,9 +61,6 @@ The honest idea (we measured it): for any task a strong model holds in one conte
 > Why this shape and not "architect dispatches everything"? Because we measured the everyday case
 > and dispatch lost — see [`ab-test/FINDINGS.md`](ab-test/FINDINGS.md).
 
-<!-- SCREENSHOT (optional): a real diagram or a terminal capture of the flow in action.
-     Save as docs/assets/flow-diagram.png and embed here. See docs/assets/README.md. -->
-
 ## Prerequisites
 
 - **[Claude Code](https://claude.com/claude-code) installed** (the CLI). Follow the official install docs.

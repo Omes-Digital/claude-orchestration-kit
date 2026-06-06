@@ -38,7 +38,7 @@ reduce rot, which is a **quality** win. Trim for correctness, not for the invoic
 | L5 | **`Explore` for code research** (it skips CLAUDE.md+git) | −~30% on research | faster | + | S |
 | L6 | **Keep CLAUDE.md lean** (< 200 lines / 25 KB) | small | = | + | — |
 | L7 | **Curate vendored skills** (don't `--all` by reflex) | small | = | + | S |
-| L8 | **`/effort` level** for speed | — | + | = | — |
+| L8 | **`/effort` ladder** — match reasoning depth to the task | ± | ± | ± | — |
 | L9 | **`/compact` & `/clear` discipline** + earlier auto-compact | small | + | + | — |
 
 ## 3. Session-model routing (L1) — the biggest real-$ lever
@@ -68,9 +68,25 @@ ships an **opt-in** profile:
 stops. **Pair it with the `no-destructive-git` hook** (the profile already wires it) so "faster" still has a
 safety net. Widen the allow-list per project; never allow `git push`.
 
-## 5. Wall-clock levers (L8)
+## 5. Reasoning effort (L8) — the `/effort` ladder
 
-- **`/effort low`** for simple/mechanical tasks: less thinking, so faster and cheaper. Keep the default for normal work; reserve `high`/`max` for genuinely hard reasoning. (This is the free, built-in speed lever — there's no "fast mode" worth recommending: the paid Fast-Mode API tier is niche and out of scope here.)
+Effort is the **second dial** next to model choice: *which model* sets capability and $/token, `/effort` sets how much reasoning the model spends per step. They're orthogonal — pick both. Five levels:
+
+| Level | Use for | Cost |
+|---|---|---|
+| `low` | Mechanical / latency-sensitive — renames, config, boilerplate, quick back-and-forth | least |
+| `medium` | Cost-sensitive work that can trade a little intelligence | reduced |
+| `high` *(default on Opus 4.8 / Sonnet 4.6)* | Most coding and normal multi-file changes | moderate |
+| `xhigh` | Genuinely hard design, cross-file invariant reasoning, gnarly diagnosis — the same triggers that justify `/model opus` | higher |
+| `max` | Last resort when `xhigh` stalls; **unbounded and prone to overthinking** — verify it actually helped | highest |
+
+**It's adaptive, not fixed.** On Opus 4.8/4.7 a level is an *upper bound* the model draws on by complexity — `high` already throttles itself down on easy steps, so you don't pay `xhigh` prices on trivial turns. (Older models like Sonnet 4.6 instead pair effort with a fixed thinking budget via `MAX_THINKING_TOKENS`.)
+
+**Pair it with model choice, don't substitute.** For a **reasoning-bound** (not knowledge-bound) task, a cheaper model at higher effort can beat a pricier model at low effort — so try **`/effort xhigh` on Sonnet before jumping to Opus**. Lowering effort is also the free, built-in speed/cost lever for simple work (there's no "fast mode" worth recommending — the paid Fast-Mode tier is niche and out of scope here).
+
+**Caveats.** **Haiku has no effort control** — the `implementer-haiku` tier can't be tuned this way, which is another reason it's for mechanical slices only. Switching model **resets** effort to the new model's default, so re-set after `/model`. If you set a level the active model doesn't support, Claude Code silently falls back to the highest supported level at or below it.
+
+**Mechanics.** `/effort <level>` switches mid-session (no arg → interactive slider). `ultrathink` anywhere in a prompt buys one deeper turn without changing the session level. Persist a default with `effortLevel` in `settings.json` (`low`/`medium`/`high`/`xhigh` only — `max` is session-only) or `CLAUDE_CODE_EFFORT_LEVEL` env (env wins over both, plus `auto` to reset to model default). `ultracode` = `xhigh` + Workflow orchestration, the explicit opt-in for multi-agent runs (session-only).
 
 ## 6. Hooks + output habits (L3)
 

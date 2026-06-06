@@ -100,6 +100,10 @@ them). Without them, `align` still runs — those steps just no-op.
 
 ## 2. Settings
 
+**Two settings files ship with the kit — copy _one_ into `~/.claude/settings.json`, not both:**
+- **[`settings.example.json`](settings.example.json)** — beginner-safe baseline; asks before edits. **Start here.**
+- **[`settings.efficiency.json`](settings.efficiency.json)** — opt-in power profile (Sonnet default, `acceptEdits`, narrow allow-list, git-guardrail hook). Graduate to it once you trust the setup.
+
 Copy [`settings.example.json`](settings.example.json) to `~/.claude/settings.json` (merge it into yours if
 you already have one — **don't blindly overwrite**, and never commit secrets / personal paths):
 

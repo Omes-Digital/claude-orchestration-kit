@@ -105,9 +105,6 @@ claude-orchestration-kit/
 └── docs/ ............... GLOSSARY · SKILL-CHEATSHEET · EXAMPLE · FAQ · EFFICIENCY
 ```
 
-<!-- SCREENSHOT: terminal showing `/skills` listing the installed skills after running install.sh.
-     Save as docs/assets/skills-list.png and reference it here. See docs/assets/README.md. -->
-
 ## Where to go next
 
 | If you want to… | Read |

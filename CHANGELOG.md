@@ -33,6 +33,14 @@ dates matter more than version numbers.
 - **Session-model routing** — CLAUDE.md now says "strongest" ≠ "always Opus": Sonnet for most coding
   (~0.6× Opus, faster), Opus for hard design, Haiku for mechanical. Ships `settings.efficiency.json`
   (`model: sonnet` + `acceptEdits` + a narrow `permissions.allow`, guarded by the git hook).
+- **Reasoning-effort doctrine** — promoted `/effort` from a one-line speed tip to the **second dial**
+  alongside model choice (*which model* × *how hard it thinks*). `CLAUDE.md` gains a tight "effort is a
+  second dial" paragraph (map `low`/`medium` → mechanical, `high` → most work, `xhigh` → the hard cases that
+  justify `/model opus`, `max` → last resort); `docs/EFFICIENCY.md` §5 carries the full ladder — the five
+  levels, adaptive-vs-fixed behaviour, the **pair-don't-substitute** rule (Sonnet at `xhigh` can beat Opus at
+  `low` on reasoning-bound work), the Haiku-has-no-effort + model-switch-resets caveats, and the mechanics
+  (`ultrathink`, `effortLevel` in settings, `CLAUDE_CODE_EFFORT_LEVEL` precedence, `ultracode`). Verified
+  against current model-config / settings docs.
 - **Hooks** — new `hooks/`: `no-destructive-git.sh` (PreToolUse — *deterministically* blocks force-push /
   `reset --hard` / `clean -fd` / catastrophic `rm`, turning the strict-mode rule into a hard guarantee) and
   `auto-format.sh` (PostToolUse — saves a format round-trip; optional). Installers copy + chmod them, doctor
@@ -89,7 +97,6 @@ dates matter more than version numbers.
 - `docs/SKILL-CHEATSHEET.md` — "I want to… → use this skill" table, grouped by phase.
 - `docs/EXAMPLE.md` — a narrated worked example of the align → dispatch → implement → review loop.
 - `docs/FAQ.md` — setup troubleshooting and cost/model/permission questions.
-- `docs/assets/README.md` — convention for adding real screenshots to replace the doc placeholders.
 
 ### Changed
 - `README.md` — added a "new here?" banner, prerequisites, and beginner-doc navigation.
