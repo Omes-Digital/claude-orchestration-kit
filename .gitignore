@@ -1,2 +1,5 @@
 .DS_Store
 *.zip
+
+# local A/B measurement outputs (your own data, not part of the kit)
+ab-test/result-*.md

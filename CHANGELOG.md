@@ -24,6 +24,13 @@ dates matter more than version numbers.
   the kit-owned files it would delete); `--yes` / `-Yes` actually removes. Keeps a customized/merged
   `CLAUDE.md`, never touches skills/agents you added yourself, and leaves backups in place.
 
+### Added — measure it yourself
+- `ab-test/` — a self-run A/B harness to test the kit against a vanilla session on the *same* task and
+  compare cost / wall-clock / quality on your own setup. `RUN-system.md` and `RUN-vanilla.md` are
+  self-contained (paste one file's path into a fresh chat; it does the task under that condition and writes
+  its scorecard); `COMPARE.md` reads both and gives an honest verdict (explicitly told not to flatter the
+  kit). `result-*.md` outputs are git-ignored. Built deliberately honest — one run is an anecdote, not proof.
+
 ### Added — beginner on-ramp
 - `START-HERE.md` — single entry point with a 3-level progressive adoption path (try one skill → add the
   playbook + memory → full orchestration).

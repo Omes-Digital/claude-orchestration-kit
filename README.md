@@ -28,6 +28,7 @@ The idea: keep a frontier model (Opus) as the **architect** doing design, contra
 | `install.sh` / `install.ps1` | One-command installers (macOS/Linux · Windows) with backup, doctor (`--check`), and `--all`. |
 | `settings.example.json` | Beginner-safe `~/.claude/settings.json` baseline. |
 | `START-HERE.md` · `docs/` | Beginner on-ramp: glossary, skill cheat-sheet, worked example, FAQ. |
+| `ab-test/` | A self-run A/B harness to measure the kit vs a vanilla session on the same task (cost · speed · quality). Honest by design — see [`ab-test/README.md`](ab-test/README.md). |
 
 > The `vendor/` skills are third-party MIT-licensed work redistributed with their original
 > license + attribution — see [`THIRD_PARTY_LICENSES.md`](THIRD_PARTY_LICENSES.md). They are
