@@ -69,7 +69,7 @@ Claude usually picks the right one.
 ### 🧰 Manage the session
 | Goal | Skill | Source |
 |---|---|---|
-| Keep the session lean / watch context % | `/compact` at breakpoints + the opt-in `scripts/statusline.sh` meter | built-in / bundled |
+| Keep the session lean / watch context % + cost | `/compact` at breakpoints + the opt-in `scripts/statusline.sh` meter | built-in / bundled |
 | Cut token use ~75% (terse mode) | `caveman` | vendor (mattpocock) |
 | Compress the session into a hand-off doc | `handoff` | vendor (mattpocock) |
 | Write a brand-new skill | `write-a-skill` | vendor (mattpocock) |

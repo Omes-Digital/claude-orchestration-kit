@@ -81,7 +81,7 @@ bash install.sh            # macOS / Linux  (add --all for the vendored skills)
 pwsh -File install.ps1     # Windows        (add -All for the vendored skills)
 ```
 
-It backs up anything it touches, won't overwrite your own `CLAUDE.md`, and `--check` verifies the install.
+It backs up anything it touches, won't overwrite your own `CLAUDE.md`, `--check` verifies the install, and `--verify` checks file integrity against `SHA256SUMS`.
 Full details, manual steps, and Windows notes are in [`INSTALL.md`](INSTALL.md).
 
 ## Beginner docs

@@ -37,7 +37,7 @@ The installer:
 - **never clobbers your own `CLAUDE.md`** — if you already have one, it writes the kit's playbook to
   `CLAUDE.orchestration.md` instead and tells you to merge,
 - is **idempotent** (safe to re-run),
-- supports `--check` / `-Check` to verify without changing anything (see [§3](#3-verify)).
+- supports `--check` / `-Check` (file doctor) and `--verify` / `-Verify` (integrity vs `SHA256SUMS`) — both change nothing (see [§3](#3-verify)).
 
 > Want only the community skills, not the core? Use `--with-vendor` / `-WithVendor`.
 
@@ -128,7 +128,7 @@ The example deliberately omits personal plugin/marketplace config — add your o
 ### Optional: the context meter (status line)
 
 The installer drops `statusline.sh` / `statusline.ps1` into `~/.claude/scripts/` but does **not** turn them
-on. They render a one-line status bar — `model · dir (branch) · ctx NN% · Nk` — and the `ctx` figure turns
+on. They render a one-line status bar — `model · dir (branch) · ctx NN% · Nk · $cost · 5h/7d limit%` — and the `ctx` figure turns
 yellow with a `⚠ /compact` nudge. Defaults are **model-aware window %** — the Opus architect nudges earlier
 than the cheaper tiers: **Opus at 40%**, **other models at 60%** of the context window. Because % is relative
 to your model's window, 40% means ~80k tokens on a 200k model but ~400k on a 1M-context one — so a big-window
@@ -147,8 +147,11 @@ To enable it, add a `statusLine` key to `~/.claude/settings.json` and **restart 
 "statusLine": { "type": "command", "command": "pwsh -File ~/.claude/scripts/statusline.ps1", "padding": 1 }
 ```
 
-It only reads the status JSON Claude Code already provides (`context_window.used_percentage`) — it spends no
-tokens and changes no behavior. To disable, remove the `statusLine` key and restart.
+The bar also shows your **session `$cost`** (`cost.total_cost_usd`) and, on Claude.ai Pro/Max, **plan
+rate-limit %** (`rate_limits.{five_hour,seven_day}`) — each appears only when Claude Code supplies it. Set
+`KIT_BUDGET_USD` to turn the cost red past a budget; `KIT_RATELIMIT_WARN` (default 80) turns a window yellow.
+It only reads the status JSON Claude Code already provides — it spends no tokens and changes no behavior. To
+disable, remove the `statusLine` key and restart.
 
 ## 3. Verify
 
@@ -207,9 +210,10 @@ Once you trust the setup, the kit ships an opt-in efficiency profile and guardra
 
 - **`settings.efficiency.json`** — copy into `~/.claude/settings.json` for `model: sonnet` (most coding at
   ~0.6× Opus and faster; `/model opus` to escalate for hard design), `acceptEdits` + a narrow
-  `permissions.allow` (far fewer permission stops), and the `no-destructive-git` hook wired in as a safety net.
-- **`hooks/`** — `no-destructive-git.sh` (blocks force-push / `reset --hard` / `clean -fd`) and
-  `auto-format.sh`. The installer drops them at `~/.claude/hooks/`; wire them per
+  `permissions.allow` (far fewer permission stops), and the `no-destructive-git` + `no-secrets` hooks wired in as a safety net.
+- **`hooks/`** — `no-destructive-git.sh` (blocks force-push / `reset --hard` / `clean -fd`),
+  `no-secrets.sh` (blocks committing keys / tokens / `.env`), and `auto-format.sh`. The installer drops them
+  at `~/.claude/hooks/`; wire them per
   [`hooks/README.md`](hooks/README.md).
 
 Full evidence + the lever menu (caching, model routing, round-trips, context rot) is in

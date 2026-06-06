@@ -65,7 +65,7 @@ ships an **opt-in** profile:
 | `bypassPermissions` | Zero prompts | **Only** in a container/VM |
 
 `acceptEdits` + a narrow `permissions.allow` (e.g. `Bash(npm test*)`, `Bash(git diff*)`) cuts ~50–80% of
-stops. **Pair it with the `no-destructive-git` hook** (the profile already wires it) so "faster" still has a
+stops. **Pair it with the `no-destructive-git` + `no-secrets` hooks** (the profile wires both) so "faster" still has a
 safety net. Widen the allow-list per project; never allow `git push`.
 
 ## 5. Reasoning effort (L8) — the `/effort` ladder
@@ -90,9 +90,10 @@ Effort is the **second dial** next to model choice: *which model* sets capabilit
 
 ## 6. Hooks + output habits (L3)
 
-The kit ships two hooks in [`hooks/`](../hooks/): `no-destructive-git.sh` (PreToolUse — **enforces** the
-"no destructive git" rule deterministically) and `auto-format.sh` (PostToolUse — saves a format-check
-round-trip; optional). See [`hooks/README.md`](../hooks/README.md).
+The kit ships three hooks in [`hooks/`](../hooks/): `no-destructive-git.sh` (PreToolUse — **enforces** the
+"no destructive git" rule deterministically), `no-secrets.sh` (PreToolUse — **blocks** a `git commit` that
+would add keys / tokens / `.env`), and `auto-format.sh` (PostToolUse — saves a format-check round-trip;
+optional). See [`hooks/README.md`](../hooks/README.md).
 
 **Honest limit:** a `PreToolUse` hook can't filter a command's *output* (it runs before the tool). Keep
 noisy output out of context as a **habit**: `pytest -q` not `-v`, pipe big logs through `tail`/`grep`, ask
@@ -107,7 +108,7 @@ for failures only.
   turn** even if unused. Install only the handful you actually reach for (e.g. `grill-me`, `caveman`,
   `handoff`, `brainstorming`, `writing-plans`) — `--with-vendor` then prune, or copy individually.
 - **`/compact` at clean breakpoints, `/clear` between unrelated tasks.** Set `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE`
-  to compact before the ~95% auto-trigger. Enable the kit's [status-line meter](../scripts/) to see context fill.
+  to compact before the ~95% auto-trigger. Enable the kit's [status-line meter](../scripts/) to see context fill — it also surfaces live session `$cost` and plan rate-limit %.
 
 ## 8. Sub-agent economics
 

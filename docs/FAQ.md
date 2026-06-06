@@ -14,6 +14,8 @@ Common questions and setup snags. New here? Start with [START-HERE.md](../START-
    pwsh -File install.ps1 -Check    # Windows
    ```
    It prints ✓/✗ for each expected file. Anything ✗ means it wasn't copied — re-run the installer.
+3. **(Optional) verify integrity.** `bash install.sh --verify` (or `pwsh -File install.ps1 -Verify`) re-hashes
+   the kit against the shipped `SHA256SUMS` — handy right after cloning to confirm nothing was altered in transit.
 3. **Confirm the location.** Files must be under `~/.claude/skills/<name>/SKILL.md`
    (Windows: `%USERPROFILE%\.claude\skills\<name>\SKILL.md`).
 
@@ -89,12 +91,12 @@ adopt the kit at [Level 1](../START-HERE.md) (just a skill or two) instead — n
 
 ### How do I see how full the context window is? / enable the `/compact` nudge?
 The installer ships an **opt-in status line** (`~/.claude/scripts/statusline.sh` or `.ps1`) that shows
-`model · dir (branch) · ctx NN% · Nk` and flags `⚠ /compact` once the context gets heavy. It's off until you
+`model · dir (branch) · ctx NN% · Nk · $cost · 5h/7d limit%` and flags `⚠ /compact` once the context gets heavy. It's off until you
 add a `statusLine` key to `~/.claude/settings.json` — the exact per-OS block is in
 [INSTALL.md §2](../INSTALL.md). Defaults are **model-aware window %**: Opus nudges at 40%, other models at
 60%. (% is window-relative — 40% is ~80k tokens on a 200k model but ~400k on a 1M-context one.) To cap by
 absolute size instead, set `KIT_COMPACT_TOKENS` (off by default); override the percent with `KIT_COMPACT_AT`.
-The bash version needs `jq`; it spends no tokens.
+The cost (`$`) and rate-limit segments appear only when Claude Code provides them — `KIT_BUDGET_USD` reddens the cost past a budget, `KIT_RATELIMIT_WARN` (default 80) yellows a window. The bash version needs `jq`; it spends no tokens.
 
 ### My sessions keep getting slow / "running out of context" — what do I do?
 Long architect sessions get re-processed every turn, which is slow and pricey. Two habits (both in
