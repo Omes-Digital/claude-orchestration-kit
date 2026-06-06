@@ -91,9 +91,10 @@ adopt the kit at [Level 1](../START-HERE.md) (just a skill or two) instead — n
 The installer ships an **opt-in status line** (`~/.claude/scripts/statusline.sh` or `.ps1`) that shows
 `model · dir (branch) · ctx NN% · Nk` and flags `⚠ /compact` once the context gets heavy. It's off until you
 add a `statusLine` key to `~/.claude/settings.json` — the exact per-OS block is in
-[INSTALL.md §2](../INSTALL.md). The nudge fires on **absolute tokens** (`KIT_COMPACT_TOKENS`, default 80000)
-or window % (`KIT_COMPACT_AT`, default 40), whichever first — token-first because 40% of a 1M-context model
-is ~400k tokens, far more than 40% of a 200k one. The bash version needs `jq`; it spends no tokens.
+[INSTALL.md §2](../INSTALL.md). Defaults are **model-aware** (the Opus architect is kept leaner than the
+cheaper tiers: Opus ~80k / 40%, other models ~120k / 60%) and fire on absolute tokens or window %, whichever
+first — token-first because 40% of a 1M-context model is ~400k tokens. Override with `KIT_COMPACT_TOKENS` /
+`KIT_COMPACT_AT`. The bash version needs `jq`; it spends no tokens.
 
 ### My sessions keep getting slow / "running out of context" — what do I do?
 Long architect sessions get re-processed every turn, which is slow and pricey. Two habits (both in

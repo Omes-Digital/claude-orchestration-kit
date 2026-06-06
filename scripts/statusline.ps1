@@ -10,16 +10,15 @@
 #   "statusLine": { "type": "command", "command": "pwsh -File ~/.claude/scripts/statusline.ps1", "padding": 1 }
 # then restart Claude Code. See INSTALL.md §2 and docs/FAQ.md.
 #
-# The /compact nudge fires on EITHER trigger (whichever hits first):
-#   $env:KIT_COMPACT_TOKENS = 80000  absolute context tokens (default; the real "staying lean" signal —
-#                                    ~80k is where context rot starts to bite, regardless of window size)
-#   $env:KIT_COMPACT_AT = 40         percent of the context window (backstop; 40% of a 1M window is ~400k)
+# The /compact nudge fires on EITHER trigger (whichever first), with MODEL-AWARE defaults —
+# the Opus architect is kept leaner than the cheaper implementer tiers:
+#   Opus           ~80k tokens  or 40% of window
+#   other models  ~120k tokens  or 60% of window
+# Override for all models:  $env:KIT_COMPACT_TOKENS = N   /   $env:KIT_COMPACT_AT = N
 #
 $ErrorActionPreference = 'SilentlyContinue'
 
-$raw          = [Console]::In.ReadToEnd()
-$thresholdPct = if ($env:KIT_COMPACT_AT)     { [int]$env:KIT_COMPACT_AT }     else { 40 }
-$thresholdTok = if ($env:KIT_COMPACT_TOKENS) { [int]$env:KIT_COMPACT_TOKENS } else { 80000 }
+$raw = [Console]::In.ReadToEnd()
 
 try { $j = $raw | ConvertFrom-Json } catch { Write-Host -NoNewline 'kit statusline: bad input'; exit 0 }
 
@@ -29,6 +28,11 @@ $dirBase = if ($dir) { Split-Path $dir -Leaf } else { '' }
 $pct     = $j.context_window.used_percentage
 $toks    = $j.context_window.total_input_tokens
 $branch  = & git -C $dir rev-parse --abbrev-ref HEAD 2>$null
+
+# model-aware nudge defaults — keep the Opus architect leaner than the cheaper tiers; env vars override
+if ($model -match '(?i)opus') { $defPct = 40; $defTok = 80000 } else { $defPct = 60; $defTok = 120000 }
+$thresholdPct = if ($env:KIT_COMPACT_AT)     { [int]$env:KIT_COMPACT_AT }     else { $defPct }
+$thresholdTok = if ($env:KIT_COMPACT_TOKENS) { [int]$env:KIT_COMPACT_TOKENS } else { $defTok }
 
 $line = $model
 if ($dirBase) { $line += " · $dirBase" }
