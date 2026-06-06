@@ -124,10 +124,13 @@ The example deliberately omits personal plugin/marketplace config — add your o
 ### Optional: the context meter (status line)
 
 The installer drops `statusline.sh` / `statusline.ps1` into `~/.claude/scripts/` but does **not** turn them
-on. They render a one-line status bar — `model · dir (branch) · ctx NN%` — and the `ctx` figure turns yellow
-with a `⚠ /compact` nudge once the context window passes a threshold (default **75%**, override with the
-`KIT_COMPACT_AT` env var). This is the "real number" companion to the `/compact`-at-breakpoints habit in
-`CLAUDE.md` → *Context hygiene*.
+on. They render a one-line status bar — `model · dir (branch) · ctx NN% · Nk` — and the `ctx` figure turns
+yellow with a `⚠ /compact` nudge. The nudge fires on whichever comes first: **absolute context tokens**
+(`KIT_COMPACT_TOKENS`, default **80000** — roughly where context starts to get heavy) **or** the window
+percentage (`KIT_COMPACT_AT`, default **40**). It's token-first because the % is relative to your model's
+window: 40% of a 200k window is 80k tokens, but 40% of a 1M-context model is ~400k — so on big-window models
+the token trigger is the one that keeps you lean. This is the "real number" companion to the
+`/compact`-at-breakpoints habit in `CLAUDE.md` → *Context hygiene*.
 
 To enable it, add a `statusLine` key to `~/.claude/settings.json` and **restart Claude Code**:
 

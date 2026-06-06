@@ -12,9 +12,11 @@ dates matter more than version numbers.
   anchor so edits land on the right bytes), `verify-and-report` (run the contract's check, emit a verbatim
   PASS/FAIL evidence block + a memory proposal). Distilled from the implementer agent-def rules into
   discrete, on-demand skills.
-- `scripts/statusline.sh` and `scripts/statusline.ps1` — an **opt-in** Claude Code status line showing the
-  live context-window % with a `/compact` nudge past a threshold (`KIT_COMPACT_AT`, default 75%). Installed
-  to `~/.claude/scripts/`; enable it in `settings.json` (see `INSTALL.md` §2). Not turned on automatically.
+- `scripts/statusline.sh` and `scripts/statusline.ps1` — an **opt-in** Claude Code status line showing live
+  context use (`ctx NN% · Nk`) with a `/compact` nudge. The nudge is **token-first**: it fires on absolute
+  context tokens (`KIT_COMPACT_TOKENS`, default 80000) or window % (`KIT_COMPACT_AT`, default 40), whichever
+  first — because % is window-relative (40% of a 1M-context model is ~400k tokens). Installed to
+  `~/.claude/scripts/`; enable it in `settings.json` (see `INSTALL.md` §2). Not turned on automatically.
 - `CLAUDE.md` — a "Context hygiene" section: recommend `/compact` at work-cluster breakpoints (not at a
   magic token number the model can't read) to keep the architect session lean.
 - `install.sh --uninstall` / `install.ps1 -Uninstall` — a clean removal path. Dry-run by default (previews
