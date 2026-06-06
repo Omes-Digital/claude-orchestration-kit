@@ -24,12 +24,13 @@ each is included alongside the skills it covers.
   `receiving-code-review` · `finishing-a-development-branch` · `writing-skills` ·
   `using-superpowers`
 
-## Note on the four top-level skills
+## Note on the top-level skills
 
-The skills in [`skills/`](skills/) (`dispatch`, `tdd`, `diagnose`, `review-diff`) are
-*derivative* works — best-of-each merges that draw on ideas from both libraries above plus
-Anthropic's `pr-review-toolkit`. They are original compositions, credited in-line in each
-skill, and covered by this repository's own [`LICENSE`](LICENSE).
+The skills in [`skills/`](skills/) are this repository's own work, covered by its
+[`LICENSE`](LICENSE). `align` is wholly original. The other four (`dispatch`, `tdd`,
+`diagnose`, `review-diff`) are *derivative* — best-of-each merges that draw on ideas from
+both libraries above plus Anthropic's `pr-review-toolkit`; they are original compositions
+credited in-line in each skill.
 
 ---
 

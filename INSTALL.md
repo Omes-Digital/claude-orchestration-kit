@@ -23,7 +23,7 @@ cp CLAUDE.md ~/.claude/CLAUDE.md
 mkdir -p ~/.claude/agents
 cp agents/*.md ~/.claude/agents/
 
-# the four bundled skills
+# the bundled own skills (align, dispatch, tdd, diagnose, review-diff)
 mkdir -p ~/.claude/skills
 cp -r skills/* ~/.claude/skills/
 

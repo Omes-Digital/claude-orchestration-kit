@@ -11,6 +11,7 @@ The idea: keep a frontier model (Opus) as the **architect** doing design, contra
 | `CLAUDE.md` | The orchestration framework — tiering rules, skill routing, memory loop. Goes at `~/.claude/CLAUDE.md`. |
 | `agents/implementer-sonnet.md` | Heavy-tier strict-mode implementer (multi-file / cross-file invariants / schema risk). |
 | `agents/implementer-haiku.md` | Light-tier strict-mode implementer (single-file mechanical edits). |
+| `skills/align/` | Session-start alignment gate: diverge → ≥95% confidence in one batched question round → confirmed brief, *before* any work or dispatch. |
 | `skills/dispatch/` | Architect→implementer orchestration: strict contract + tier pick + two-stage review gate. |
 | `skills/tdd/` | Test-driven development (red-green-refactor, vertical slices). |
 | `skills/diagnose/` | Disciplined root-cause diagnosis loop for hard bugs. |
@@ -26,6 +27,11 @@ The idea: keep a frontier model (Opus) as the **architect** doing design, contra
 ## The core idea in one diagram
 
 ```
+        ┌─────────────────────────────────────────────┐
+        │  /align  — confidence gate (≥95%) before work │
+        │  diverge · question once · confirmed brief    │
+        └───────────────┬─────────────────────────────┘
+                        ▼
         ┌─────────────────────────────────────────────┐
         │  ARCHITECT  (Opus, this session)            │
         │  design · contract · triage · review        │
@@ -49,7 +55,7 @@ See [`INSTALL.md`](INSTALL.md). Short version: copy `CLAUDE.md`, `agents/`, `ski
 ## Design notes / credits
 
 - Tiering + strict-mode executor rules follow the *Plan → Execute → Review* pipeline (review always returns to a more-capable tier; never self-review).
-- The four top-level skills are best-of-each merges of community skill packs (Matt Pocock, superpowers / Jesse Vincent, Addy Osmani) and Anthropic's `pr-review-toolkit`.
+- Four of the five top-level skills (`dispatch`, `tdd`, `diagnose`, `review-diff`) are best-of-each merges of community skill packs (Matt Pocock, superpowers / Jesse Vincent, Addy Osmani) and Anthropic's `pr-review-toolkit`. `align` is an original skill — the confidence gate that runs *before* dispatch.
 - The `vendor/` skills are redistributed **unmodified** from [`mattpocock/skills`](https://github.com/mattpocock/skills) and [`obra/superpowers`](https://github.com/obra/superpowers), both MIT — full attribution in [`THIRD_PARTY_LICENSES.md`](THIRD_PARTY_LICENSES.md). All credit for those goes to their respective authors.
 - The memory layer is grounded in CoALA (episodic/semantic/procedural), Cline's Memory Bank, and Anthropic's context-engineering guidance.
 

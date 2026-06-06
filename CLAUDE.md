@@ -35,6 +35,7 @@ Skills are reusable prompts/workflows. Route them by phase and tier. **Mechanics
 
 | Phase | Who runs it | Skills (examples) |
 |---|---|---|
+| Align / confirm scope | Architect (main) | `align` (confidence gate → confirmed brief, *before* any work) |
 | Research / understand | Architect (main) | `deep-research` (web, orchestrating) · `Explore` agent (code) |
 | Design / plan | Architect | `grill-me` · `grill-with-docs` · `prototype` · `to-prd` · `to-issues` · `Plan` agent |
 | Decompose / delegate | Architect | `dispatch` (write the handoff contract + pick tier) · `triage` |
@@ -43,11 +44,12 @@ Skills are reusable prompts/workflows. Route them by phase and tier. **Mechanics
 | Manage / handoff | Architect | `handoff` · `caveman` · `loop` · `schedule` |
 | Harness / config | Architect (main only) | `update-config` · `fewer-permission-prompts` · `keybindings-help` |
 
-**Default play.** (1) Heavy or unclear design → keep on Opus; reach for a design skill (`grill-me` / `prototype`). (2) Bounded work → invoke `dispatch` to write the contract and pick the tier, then hand to **implementer-sonnet** (multi-file) or **implementer-haiku** (single-file). (3) The implementer reaches for `tdd` / `diagnose` while building and ends with `verify` / `run`. (4) Back on Opus: `code-review` (or `ultra`), `simplify`, `security-review` on the diff before the human's push moment.
+**Default play.** (0) Ambiguous or under-specified request → `align` first: diverge, drive to ≥95% confidence in one batched question round, emit a confirmed brief — *before* spending tokens on the wrong contract. (1) Heavy or unclear design → keep on Opus; reach for a design skill (`grill-me` / `prototype`). (2) Bounded work → invoke `dispatch` to write the contract and pick the tier, then hand to **implementer-sonnet** (multi-file) or **implementer-haiku** (single-file). (3) The implementer reaches for `tdd` / `diagnose` while building and ends with `verify` / `run`. (4) Back on Opus: `code-review` (or `ultra`), `simplify`, `security-review` on the diff before the human's push moment.
 
 **Hard rule:** never delegate an orchestrating skill (`deep-research`, `code-review ultra`, `dispatch`) into a spawned implementer — sub-agents can't spawn sub-agents. Run those in the architect session. Don't preload situational skills into implementers via the `skills:` frontmatter (it injects full text every run and bloats the cheap tier) — they're discoverable for on-demand invocation already.
 
-**The four bundled skills** (in `skills/`, best-of-each merges of community + Anthropic pr-review-toolkit patterns):
+**The bundled skills** (in `skills/`):
+- `align` — session-start confidence gate: diverge on the request, reason each reading, reach ≥95% confidence in **one batched question round**, then emit a confirmed brief and hand to `dispatch`. The step *before* the contract — a wrong contract dispatched to a cheap tier costs more than a question asked on Opus. (Original to this kit.)
 - `dispatch` — the orchestration centerpiece: strict-mode contract + tier pick + two-stage review gate (spec→quality) + evidence-based acceptance + plan-loop + parallel fan-out.
 - `tdd` — Iron Law (no prod code without a failing test) + vertical-slice/tracer-bullet + a test-design toolkit + test taxonomy.
 - `diagnose` — feedback-loop-first + root-cause Iron Law + 3-fix→question-architecture + error-recovery/untrusted-error-output.
