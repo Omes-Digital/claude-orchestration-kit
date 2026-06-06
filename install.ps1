@@ -2,7 +2,7 @@
 #
 # install.ps1 — install the Claude Code Agent Orchestration Kit into ~/.claude
 #
-#   pwsh -File install.ps1                core: CLAUDE.md + agents + 5 own skills + memory seeds
+#   pwsh -File install.ps1                core: CLAUDE.md + agents + 8 own skills + memory seeds + scripts
 #   pwsh -File install.ps1 -WithVendor    also install the 23 vendored community skills
 #   pwsh -File install.ps1 -All           everything (same as -WithVendor)
 #   pwsh -File install.ps1 -Check         doctor mode: report what's installed, change nothing
@@ -23,7 +23,7 @@ $Src    = $PSScriptRoot
 $Target = if ($env:CLAUDE_HOME) { $env:CLAUDE_HOME } else { Join-Path $HOME '.claude' }
 if ($All) { $WithVendor = $true }
 
-$OwnSkills   = @('align','dispatch','tdd','diagnose','review-diff')
+$OwnSkills   = @('align','dispatch','tdd','diagnose','review-diff','scope-guard','reread-before-edit','verify-and-report')
 $script:Backup = $null
 
 function Show-Usage {
@@ -32,7 +32,7 @@ Install the Claude Code Agent Orchestration Kit into your ~/.claude folder.
 
 Usage: pwsh -File install.ps1 [options]
 
-  (no options)   core: CLAUDE.md + implementer agents + 5 own skills + memory seeds
+  (no options)   core: CLAUDE.md + implementer agents + 8 own skills + memory seeds + scripts
   -WithVendor    also install the 23 vendored community skills
   -All           everything (same as -WithVendor)
   -Check         doctor mode: report what's installed, change nothing
@@ -61,6 +61,7 @@ if ($Check) {
     if (Test-Path (Join-Path $Target "skills/$s/SKILL.md")) { Ok "skills/$s" } else { Bad "skills/$s" }
   }
   if (Test-Path (Join-Path $Target 'agent-memory/README.md')) { Ok "agent-memory/" } else { Bad "agent-memory/" }
+  if (Test-Path (Join-Path $Target 'scripts/statusline.ps1')) { Ok "scripts/ (statusline)" } else { Bad "scripts/ (statusline)" }
   if ($WithVendor) {
     foreach ($s in @('caveman','grill-me','test-driven-development')) {
       if (Test-Path (Join-Path $Target "skills/$s/SKILL.md")) { Ok "vendored skills/$s" } else { Bad "vendored skills/$s" }
@@ -139,6 +140,16 @@ Get-ChildItem (Join-Path $Src 'agent-memory') | ForEach-Object {
   Copy-Item -Recurse -Force $_.FullName $dest
 }
 Write-Host "  - agent-memory/ (7 role seeds)"
+
+# scripts — opt-in status line (context meter) + helpers
+Backup-IfExists 'scripts'
+New-Item -ItemType Directory -Force -Path (Join-Path $Target 'scripts') | Out-Null
+Get-ChildItem (Join-Path $Src 'scripts') | ForEach-Object {
+  $dest = Join-Path (Join-Path $Target 'scripts') $_.Name
+  if (Test-Path $dest) { Remove-Item -Recurse -Force $dest }
+  Copy-Item -Recurse -Force $_.FullName $dest
+}
+Write-Host "  - scripts/ (statusline meter — opt-in; enable per INSTALL.md §2)"
 
 # vendored skills (optional)
 if ($WithVendor) {

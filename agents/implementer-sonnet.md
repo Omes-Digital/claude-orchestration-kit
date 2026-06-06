@@ -36,4 +36,7 @@ You can invoke skills with the Skill tool while executing — they are discovera
 - `diagnose` — when a multi-file bug or regression needs a feedback-loop → root-cause → fix loop before you edit. (Merged; preferred over `mattpocock-skills:diagnose`.)
 - `claude-api` — when the change touches the Anthropic SDK / Claude API (include prompt caching).
 - `frontend-design:frontend-design` — when the contract is building UI components or pages.
+- `scope-guard` — stay inside the inventory; when a step needs an unlisted file, halt and escalate one crisp question up.
+- `reread-before-edit` — re-read + anchor before each edit so multi-file changes land on the right bytes.
+- `verify-and-report` — the closing step: run the verification matrix, emit a verbatim PASS/FAIL evidence block + memory proposal.
 - `verify` / `run` — to confirm the change actually works before you report back.

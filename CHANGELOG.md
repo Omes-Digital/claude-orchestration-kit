@@ -6,6 +6,18 @@ dates matter more than version numbers.
 
 ## [Unreleased]
 
+### Added — orchestrator features
+- Three small **sub-agent skills** for the cheap implementer tier (own skills now total **eight**):
+  `scope-guard` (stay inside the contract's file list, escalate clean), `reread-before-edit` (re-read +
+  anchor so edits land on the right bytes), `verify-and-report` (run the contract's check, emit a verbatim
+  PASS/FAIL evidence block + a memory proposal). Distilled from the implementer agent-def rules into
+  discrete, on-demand skills.
+- `scripts/statusline.sh` and `scripts/statusline.ps1` — an **opt-in** Claude Code status line showing the
+  live context-window % with a `/compact` nudge past a threshold (`KIT_COMPACT_AT`, default 75%). Installed
+  to `~/.claude/scripts/`; enable it in `settings.json` (see `INSTALL.md` §2). Not turned on automatically.
+- `CLAUDE.md` — a "Context hygiene" section: recommend `/compact` at work-cluster breakpoints (not at a
+  magic token number the model can't read) to keep the architect session lean.
+
 ### Added — beginner on-ramp
 - `START-HERE.md` — single entry point with a 3-level progressive adoption path (try one skill → add the
   playbook + memory → full orchestration).
@@ -23,7 +35,9 @@ dates matter more than version numbers.
 - `README.md` — added a "new here?" banner, prerequisites, and beginner-doc navigation.
 - `INSTALL.md` — added a Prerequisites section, reworked around the install scripts, and added
   cross-platform (macOS/Linux **and** Windows) manual fallbacks and a doctor verify step.
-- `CLAUDE.md` — added a one-line "adopt incrementally" pointer to `START-HERE.md` (framework text unchanged).
+- `CLAUDE.md` — added a one-line "adopt incrementally" pointer to `START-HERE.md`, the "Context hygiene"
+  section, and registered the three new sub-agent skills in the routing table and bundled-skills list.
+- `install.sh` / `install.ps1` — now also install `scripts/` and verify it in `--check`; own-skill count 5 → 8.
 
 ## 2026-06-06 — initial public release
 - Tiered architect→implementer orchestration framework (`CLAUDE.md`).

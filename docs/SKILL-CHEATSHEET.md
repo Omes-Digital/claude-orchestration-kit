@@ -1,6 +1,6 @@
 # Skill cheat-sheet — "I want to… → use this"
 
-23 + 5 skills is a lot. Here's how to pick one. **Bundled** skills are in `skills/` (installed by default).
+23 + 8 skills is a lot. Here's how to pick one. **Bundled** skills are in `skills/` (installed by default).
 **Vendored** skills are in `vendor/` (install with `--with-vendor` / `-WithVendor`, or copy individually —
 see [INSTALL.md](../INSTALL.md)). Trigger any skill by typing `/its-name`, or just describe your goal and
 Claude usually picks the right one.
@@ -46,6 +46,15 @@ Claude usually picks the right one.
 | Execute an agreed plan step by step | `executing-plans`, `subagent-driven-development` | vendor (superpowers) |
 | Improve a codebase's architecture | `improve-codebase-architecture` | vendor (mattpocock) |
 
+> **Sub-agent disciplines** — these three are for the *implementer tier* (Claude reaches for them while
+> executing a dispatched task; you rarely type them yourself). All bundled.
+
+| Goal | Skill | Source |
+|---|---|---|
+| Stay inside the contract's files / escalate cleanly when blocked | `scope-guard` | bundled |
+| Make every edit land on the right bytes (re-read + anchor) | `reread-before-edit` | bundled |
+| Close a task with verbatim PASS/FAIL evidence + a memory proposal | `verify-and-report` | bundled |
+
 ### ✅ Verify / review
 | Goal | Skill | Source |
 |---|---|---|
@@ -57,6 +66,7 @@ Claude usually picks the right one.
 ### 🧰 Manage the session
 | Goal | Skill | Source |
 |---|---|---|
+| Keep the session lean / watch context % | `/compact` at breakpoints + the opt-in `scripts/statusline.sh` meter | built-in / bundled |
 | Cut token use ~75% (terse mode) | `caveman` | vendor (mattpocock) |
 | Compress the session into a hand-off doc | `handoff` | vendor (mattpocock) |
 | Write a brand-new skill | `write-a-skill` / `writing-skills` | vendor (mattpocock / superpowers) |

@@ -91,9 +91,10 @@ claude-orchestration-kit/
 ├── INSTALL.md ........... full install (scripts + manual, all platforms)
 ├── install.sh / .ps1 .... one-command installers (mac/linux · windows)
 ├── CLAUDE.md ............ the playbook Claude follows (Level 2+)
-├── skills/ ............. 5 skills you trigger with /name  (align, dispatch, tdd, diagnose, review-diff)
+├── skills/ ............. 8 skills you trigger with /name  (align, dispatch, tdd, diagnose, review-diff + 3 implementer helpers)
 ├── agents/ ............. 2 helper agents Claude hands work to (Level 3)
 ├── agent-memory/ ....... per-role notes that persist between sessions
+├── scripts/ ........... opt-in status line: live context % + a /compact nudge
 ├── vendor/ ............. 23 more skills from the community (MIT, optional)
 └── docs/ ............... GLOSSARY · SKILL-CHEATSHEET · EXAMPLE · FAQ
 ```

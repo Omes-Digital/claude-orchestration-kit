@@ -20,6 +20,8 @@ The idea: keep a frontier model (Opus) as the **architect** doing design, contra
 | `skills/tdd/` | Test-driven development (red-green-refactor, vertical slices). |
 | `skills/diagnose/` | Disciplined root-cause diagnosis loop for hard bugs. |
 | `skills/review-diff/` | Multi-axis code-review rubric with a confidence gate. |
+| `skills/scope-guard/` · `reread-before-edit/` · `verify-and-report/` | Three small sub-agent disciplines for the implementer tier: stay in-contract & escalate clean, land edits on the right bytes, close with verbatim evidence. |
+| `scripts/statusline.sh` · `statusline.ps1` | Opt-in status line: live context-window % with a `/compact` nudge past a threshold. |
 | `agent-memory/` | Pre-seeded per-role global memory (`architect`, `explorer`, `researcher`, `implementer`, `reviewer`, `auditor`, `memory-curator`) + the framework README. |
 | `vendor/mattpocock/` | 9 skills vendored unmodified from [`mattpocock/skills`](https://github.com/mattpocock/skills) (MIT). |
 | `vendor/superpowers/` | 14 skills vendored unmodified from [`obra/superpowers`](https://github.com/obra/superpowers) (MIT). |
@@ -93,7 +95,7 @@ Full details, manual steps, and Windows notes are in [`INSTALL.md`](INSTALL.md).
 ## Design notes / credits
 
 - Tiering + strict-mode executor rules follow the *Plan → Execute → Review* pipeline (review always returns to a more-capable tier; never self-review).
-- Four of the five top-level skills (`dispatch`, `tdd`, `diagnose`, `review-diff`) are best-of-each merges of community skill packs (Matt Pocock, superpowers / Jesse Vincent, Addy Osmani) and Anthropic's `pr-review-toolkit`. `align` is an original skill — the confidence gate that runs *before* dispatch.
+- Four of the original five top-level skills (`dispatch`, `tdd`, `diagnose`, `review-diff`) are best-of-each merges of community skill packs (Matt Pocock, superpowers / Jesse Vincent, Addy Osmani) and Anthropic's `pr-review-toolkit`. The other four are **original to this kit**: `align` (the confidence gate that runs *before* dispatch) and the three small sub-agent disciplines `scope-guard`, `reread-before-edit`, and `verify-and-report`.
 - The `vendor/` skills are redistributed **unmodified** from [`mattpocock/skills`](https://github.com/mattpocock/skills) and [`obra/superpowers`](https://github.com/obra/superpowers), both MIT — full attribution in [`THIRD_PARTY_LICENSES.md`](THIRD_PARTY_LICENSES.md). All credit for those goes to their respective authors.
 - The memory layer is grounded in CoALA (episodic/semantic/procedural), Cline's Memory Bank, and Anthropic's context-engineering guidance.
 

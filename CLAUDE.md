@@ -42,7 +42,7 @@ Skills are reusable prompts/workflows. Route them by phase and tier. **Mechanics
 | Research / understand | Architect (main) | `deep-research` (web, orchestrating) · `Explore` agent (code) |
 | Design / plan | Architect | `grill-me` · `grill-with-docs` · `prototype` · `to-prd` · `to-issues` · `Plan` agent |
 | Decompose / delegate | Architect | `dispatch` (write the handoff contract + pick tier) · `triage` |
-| Implement | implementer-sonnet / -haiku | `tdd` · `diagnose` · `frontend-design` · `claude-api` |
+| Implement | implementer-sonnet / -haiku | `tdd` · `diagnose` · `scope-guard` · `reread-before-edit` · `verify-and-report` · `frontend-design` · `claude-api` |
 | Verify | implementer self-check → architect | `verify` · `run` (implementer); then `review-diff` (rubric) · `code-review` / `ultra` · `simplify` · `security-review` (architect, orchestrating) |
 | Manage / handoff | Architect | `handoff` · `caveman` · `loop` · `schedule` |
 | Harness / config | Architect (main only) | `update-config` · `fewer-permission-prompts` · `keybindings-help` |
@@ -57,8 +57,18 @@ Skills are reusable prompts/workflows. Route them by phase and tier. **Mechanics
 - `tdd` — Iron Law (no prod code without a failing test) + vertical-slice/tracer-bullet + a test-design toolkit + test taxonomy.
 - `diagnose` — feedback-loop-first + root-cause Iron Law + 3-fix→question-architecture + error-recovery/untrusted-error-output.
 - `review-diff` — multi-axis rubric + ≥80 confidence gate + severity labels + spec-vs-standards split; the rubric behind `dispatch`'s review gate (complements the built-in `/code-review`).
+- `scope-guard` · `reread-before-edit` · `verify-and-report` — three **small sub-agent disciplines** for the cheap implementer tier: stay inside the contract's file list and escalate clean; land every edit on the right bytes (re-read + anchor + re-read); close with a verbatim PASS/FAIL evidence block + a memory proposal. Distilled from the implementer agent-def rules into discrete, *on-demand* skills (not preloaded — they stay discoverable without bloating the cheap tier).
 
 **Tier selection.** Use the *Plan → Execute → Review* pipeline: architect drafts the contract (Opus) → implementer executes (Haiku/Sonnet) → **review returns to the more capable tier** (Opus/Sonnet), never self-review. Haiku gate = "well-defined spec / established pattern / deterministic," not merely "small." **Forced-Opus triggers** (never let Sonnet silently absorb these): security-sensitive changes, cross-file invariant *design*, schema/migration risk. When weight is genuinely unknown, decide the tier at dispatch time rather than baking it in (default escalates to Sonnet). Reinforce context-isolation: each implementer sees only its contract's named files (the deny-list is the token-economy lever). Use bare `Opus`/`Sonnet`/`Haiku` — no version pins.
+
+### Context hygiene — keep the architect lean
+
+Frontier context is re-processed **every turn**, so a bloated architect session is a recurring tax — the biggest token sink after downstream implementation itself. Manage it deliberately:
+
+- **Recommend `/compact` at breakpoints, not at a magic number.** The model can't read its own live token count, so don't wait for a threshold to hit — proactively suggest `/compact` after a *cluster of work*: several dispatched implementers have returned, a big file/research dump is now stale, or you're about to pivot to an unrelated task. Context compacted between tasks is context you don't pay to re-read.
+- **`/clear` at a clean boundary** beats `/compact` when the next task shares nothing with the last — a full reset is cheaper than carrying a summary.
+- **Dispatch *is* context hygiene.** Routing bounded work to an implementer keeps its file reads and trial-and-error *out* of the architect's context. The deny-list is a token-economy lever, not only a safety rail.
+- **Optional live meter.** For a real numeric signal, enable the kit's status line (`scripts/statusline.sh` / `statusline.ps1`): it shows `ctx NN%` from the statusline's `context_window.used_percentage` and turns yellow with a `/compact` nudge past a threshold (default 75%, override `KIT_COMPACT_AT`). Opt-in — see `INSTALL.md` §2.
 
 ### Agent memory & self-improvement
 

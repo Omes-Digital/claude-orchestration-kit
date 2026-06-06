@@ -2,7 +2,7 @@
 #
 # install.sh — install the Claude Code Agent Orchestration Kit into ~/.claude
 #
-#   bash install.sh                 core: CLAUDE.md + agents + 5 own skills + memory seeds
+#   bash install.sh                 core: CLAUDE.md + agents + 8 own skills + memory seeds + scripts
 #   bash install.sh --with-vendor   also install the 23 vendored community skills
 #   bash install.sh --all           everything (same as --with-vendor)
 #   bash install.sh --check         doctor mode: report what's installed, change nothing
@@ -19,7 +19,7 @@ WITH_VENDOR=0
 CHECK=0
 BACKUP=""
 
-OWN_SKILLS="align dispatch tdd diagnose review-diff"
+OWN_SKILLS="align dispatch tdd diagnose review-diff scope-guard reread-before-edit verify-and-report"
 MEMORY_ROLES="architect explorer researcher implementer reviewer auditor memory-curator"
 
 usage() {
@@ -28,7 +28,7 @@ Install the Claude Code Agent Orchestration Kit into your ~/.claude folder.
 
 Usage: bash install.sh [options]
 
-  (no options)    core: CLAUDE.md + implementer agents + 5 own skills + memory seeds
+  (no options)    core: CLAUDE.md + implementer agents + 8 own skills + memory seeds + scripts
   --with-vendor   also install the 23 vendored community skills
   --all           everything (same as --with-vendor)
   --check         doctor mode: report what's installed, change nothing
@@ -64,6 +64,7 @@ if [ "$CHECK" -eq 1 ]; then
     if [ -e "$TARGET/skills/$s/SKILL.md" ]; then ok "skills/$s"; else bad "skills/$s"; fi
   done
   if [ -e "$TARGET/agent-memory/README.md" ]; then ok "agent-memory/"; else bad "agent-memory/"; fi
+  if [ -e "$TARGET/scripts/statusline.sh" ]; then ok "scripts/ (statusline)"; else bad "scripts/ (statusline)"; fi
   if [ "$WITH_VENDOR" -eq 1 ]; then
     for s in caveman grill-me test-driven-development; do
       if [ -e "$TARGET/skills/$s/SKILL.md" ]; then ok "vendored skills/$s"; else bad "vendored skills/$s"; fi
@@ -135,6 +136,13 @@ backup_if_exists "agent-memory"
 mkdir -p "$TARGET/agent-memory"
 cp -R "$SRC/agent-memory/." "$TARGET/agent-memory/"
 echo "  • agent-memory/ (7 role seeds)"
+
+# scripts — opt-in status line (context meter) + helpers
+backup_if_exists "scripts"
+mkdir -p "$TARGET/scripts"
+cp -R "$SRC/scripts/." "$TARGET/scripts/"
+chmod +x "$TARGET"/scripts/*.sh 2>/dev/null || true
+echo "  • scripts/ (statusline meter — opt-in; enable per INSTALL.md §2)"
 
 # vendored skills (optional)
 if [ "$WITH_VENDOR" -eq 1 ]; then

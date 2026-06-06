@@ -23,7 +23,7 @@ From the repo root:
 
 ```bash
 # macOS / Linux
-bash install.sh                # core: CLAUDE.md + agents + 5 own skills + memory seeds
+bash install.sh                # core: CLAUDE.md + agents + 8 own skills + memory seeds + scripts
 bash install.sh --all          # also install the 23 vendored community skills
 ```
 ```powershell
@@ -121,6 +121,28 @@ What each key does:
 
 The example deliberately omits personal plugin/marketplace config — add your own if you use plugins.
 
+### Optional: the context meter (status line)
+
+The installer drops `statusline.sh` / `statusline.ps1` into `~/.claude/scripts/` but does **not** turn them
+on. They render a one-line status bar — `model · dir (branch) · ctx NN%` — and the `ctx` figure turns yellow
+with a `⚠ /compact` nudge once the context window passes a threshold (default **75%**, override with the
+`KIT_COMPACT_AT` env var). This is the "real number" companion to the `/compact`-at-breakpoints habit in
+`CLAUDE.md` → *Context hygiene*.
+
+To enable it, add a `statusLine` key to `~/.claude/settings.json` and **restart Claude Code**:
+
+```jsonc
+// macOS / Linux  (needs `jq` on your PATH)
+"statusLine": { "type": "command", "command": "~/.claude/scripts/statusline.sh", "padding": 1 }
+```
+```jsonc
+// Windows (PowerShell)
+"statusLine": { "type": "command", "command": "pwsh -File ~/.claude/scripts/statusline.ps1", "padding": 1 }
+```
+
+It only reads the status JSON Claude Code already provides (`context_window.used_percentage`) — it spends no
+tokens and changes no behavior. To disable, remove the `statusLine` key and restart.
+
 ## 3. Verify
 
 **Doctor (files on disk):**
@@ -135,7 +157,7 @@ It prints ✓/✗ for each expected file. Add `--all` / `-All` to also check the
 **In Claude Code (after restarting):**
 ```
 /agents     →  implementer-sonnet and implementer-haiku listed
-/skills     →  align, dispatch, tdd, diagnose, review-diff listed
+/skills     →  align, dispatch, tdd, diagnose, review-diff, scope-guard, reread-before-edit, verify-and-report listed
 ```
 
 Then try the loop: ask Claude to design something small, then say **"dispatch this"** — it should write a

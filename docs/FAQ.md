@@ -76,7 +76,27 @@ Both are loaded; project instructions take precedence for that repo. The kit's g
 Delete `~/.claude/CLAUDE.md` (or the `CLAUDE.orchestration.md` the installer wrote) and restart. You can
 adopt the kit at [Level 1](../START-HERE.md) (just a skill or two) instead — no global behavior change.
 
+## Context & tokens
+
+### How do I see how full the context window is? / enable the `/compact` nudge?
+The installer ships an **opt-in status line** (`~/.claude/scripts/statusline.sh` or `.ps1`) that shows
+`model · dir (branch) · ctx NN%` and flags `⚠ /compact` once you pass a threshold. It's off until you add a
+`statusLine` key to `~/.claude/settings.json` — the exact per-OS block is in [INSTALL.md §2](../INSTALL.md).
+The bash version needs `jq`; threshold override is `KIT_COMPACT_AT` (default 75). It spends no tokens.
+
+### My sessions keep getting slow / "running out of context" — what do I do?
+Long architect sessions get re-processed every turn, which is slow and pricey. Two habits (both in
+`CLAUDE.md` → *Context hygiene*): run **`/compact`** at a natural breakpoint (after a batch of work, before
+an unrelated task) to summarize and free space, and **`/clear`** when the next task shares nothing with the
+last (a full reset beats carrying a summary). Routing bounded work to an implementer via `/dispatch` also
+keeps that work *out* of your main session's context.
+
 ## Skills
+
+### What are `scope-guard`, `reread-before-edit`, and `verify-and-report`?
+Three small disciplines the **implementer sub-agents** reach for mid-task (you rarely invoke them by hand):
+stay inside the assigned files and escalate cleanly, re-read before each edit so it lands on the right bytes,
+and finish with verbatim PASS/FAIL evidence. They're on-demand, so they don't bloat the cheap tier.
 
 ### A skill didn't trigger when I expected
 Type it explicitly: `/align`, `/diagnose`, etc. Auto-selection depends on your wording matching the skill's
