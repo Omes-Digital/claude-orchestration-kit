@@ -20,8 +20,9 @@ file's `COST_USD` line, and note the wall-clock.
 
 | Folder | Task | Size | Point |
 |---|---|---|---|
-| `expense-tracker/` | A small multi-file CLI expense tracker + tests | warm-up | sanity-check the harness; small enough that the kit may *not* pay off |
-| `calculator/` | A `calc` expression language (lexer → parser → evaluator) + tests | complex | real cross-file invariants + tricky correctness (precedence, right-assoc, error paths) — where the kit's edge, if any, should show |
+| `expense-tracker/` | A small multi-file CLI expense tracker + tests | greenfield · warm-up | sanity-check the harness; small enough that the kit may *not* pay off |
+| `calculator/` | A `calc` expression language (lexer → parser → evaluator) + tests | greenfield · complex | real cross-file invariants + tricky correctness (precedence, right-assoc, error paths) |
+| `existing-repo/` | Add due-dates **end-to-end** to a pre-seeded existing layered todo app | **cross-cutting · existing code** | the regime the kit is *actually built for* — a change spread across an existing multi-file codebase where a single pass can drop a layer (storage round-trip, legacy back-compat) or cause a regression. The greenfield tasks above are the regime *least* favorable to orchestration; this is the fair test of its real claim. |
 
 **Verify the flag first:** `claude --bare` is the cleanest vanilla baseline — confirm it exists with
 `claude --help`. If it doesn't, temporarily move your kit files aside instead

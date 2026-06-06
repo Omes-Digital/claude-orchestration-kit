@@ -4,3 +4,6 @@
 # local A/B measurement outputs (your own data, not part of the kit)
 ab-test/result-*.md
 ab-test/**/result-*.md
+__pycache__/
+.pytest_cache/
+*.pyc

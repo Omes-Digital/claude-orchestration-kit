@@ -31,7 +31,9 @@ dates matter more than version numbers.
   condition and writes its scorecard) and `COMPARE.md` (reads both, gives an honest verdict — explicitly told
   not to flatter the kit). Ships two tasks: `expense-tracker/` (warm-up) and `calculator/` (a lexer→parser→
   evaluator expression language — complex, real cross-file invariants, where the kit's edge should show if it
-  exists). `result-*.md` outputs are git-ignored. Built deliberately honest — one run is an anecdote, not proof.
+  exists) and `existing-repo/` (a cross-cutting change — add due-dates end-to-end — to a **pre-seeded existing**
+  layered todo app; the regime the kit is actually built for, where a single pass can drop a layer or cause a
+  regression). `result-*.md` outputs are git-ignored. Built deliberately honest — one run is an anecdote, not proof.
 
 ### Added — beginner on-ramp
 - `START-HERE.md` — single entry point with a 3-level progressive adoption path (try one skill → add the
