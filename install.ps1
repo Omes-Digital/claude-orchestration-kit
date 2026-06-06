@@ -6,6 +6,7 @@
 #   pwsh -File install.ps1 -WithVendor    also install the 15 vendored community skills
 #   pwsh -File install.ps1 -All           everything (same as -WithVendor)
 #   pwsh -File install.ps1 -Check         doctor mode: report what's installed, change nothing
+#   pwsh -File install.ps1 -Verify        integrity: check files against SHA256SUMS, change nothing
 #   pwsh -File install.ps1 -Uninstall     preview which kit files would be removed (dry run)
 #   pwsh -File install.ps1 -Uninstall -Yes   actually remove the kit's files
 #   pwsh -File install.ps1 -Help          show help
@@ -17,6 +18,7 @@ param(
   [switch]$WithVendor,
   [switch]$All,
   [switch]$Check,
+  [switch]$Verify,
   [switch]$Uninstall,
   [switch]$Yes,
   [switch]$Help
@@ -40,6 +42,7 @@ Usage: pwsh -File install.ps1 [options]
   -WithVendor    also install the 15 vendored community skills
   -All           everything (same as -WithVendor)
   -Check         doctor mode: report what's installed, change nothing
+  -Verify        integrity check: verify files against SHA256SUMS, change nothing
   -Uninstall     preview the kit files that would be removed (dry run; add -Yes to delete)
   -Yes           with -Uninstall, actually remove (otherwise it only previews)
   -Help          show this help
@@ -50,6 +53,37 @@ Target folder: $Target
 }
 
 if ($Help) { Show-Usage; exit 0 }
+
+# ---- verify mode ----
+if ($Verify) {
+  $manifest = Join-Path $Src 'SHA256SUMS'
+  if (-not (Test-Path $manifest)) {
+    Write-Host "No SHA256SUMS found in $Src."
+    Write-Host "Generate it first (macOS/Linux):  bash scripts/gen-checksums.sh"
+    exit 1
+  }
+  Write-Host "Verifying $Src against SHA256SUMS ..."
+  $fail = 0; $checked = 0
+  foreach ($line in Get-Content $manifest) {
+    if ($line -notmatch '\S') { continue }
+    $parts = $line -split '\s+', 2          # "<hash>  <path>"
+    $want  = $parts[0].ToLower()
+    $rel   = if ($parts.Count -gt 1) { $parts[1].TrimStart('*').Trim() } else { '' }
+    if (-not $rel) { continue }
+    $p = Join-Path $Src $rel
+    if (-not (Test-Path -LiteralPath $p)) { Write-Host "  MISSING  $rel" -ForegroundColor Red; $fail++; continue }
+    $have = (Get-FileHash -LiteralPath $p -Algorithm SHA256).Hash.ToLower()
+    if ($have -ne $want) { Write-Host "  CHANGED  $rel" -ForegroundColor Red; $fail++ }
+    $checked++
+  }
+  if ($fail -eq 0) {
+    Write-Host "  OK — all $checked listed files match SHA256SUMS."
+    exit 0
+  } else {
+    Write-Host "  FAILED — $fail of $checked file(s) differ from the manifest. Do not trust this copy."
+    exit 1
+  }
+}
 
 # ---- doctor mode ----
 if ($Check) {

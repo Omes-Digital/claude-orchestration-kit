@@ -161,6 +161,20 @@ pwsh -File install.ps1 -Check    # Windows
 ```
 It prints ✓/✗ for each expected file. Add `--all` / `-All` to also check the vendored skills.
 
+**Integrity (bytes match what was published):**
+```bash
+bash install.sh --verify          # macOS / Linux
+```
+```powershell
+pwsh -File install.ps1 -Verify    # Windows
+```
+This re-hashes the repo's files and checks them against the shipped `SHA256SUMS` manifest — useful right
+after cloning, to confirm nothing was altered in transit. It changes nothing and exits non-zero on any
+mismatch. Maintainers regenerate the manifest after editing kit files with `bash scripts/gen-checksums.sh`,
+then commit the updated `SHA256SUMS` alongside the change. (Want stronger assurance that the manifest
+itself is authentic? Sign it — e.g. with `minisign` — and publish the key out of band; optional, not
+required for a checksum-only integrity check.)
+
 **In Claude Code (after restarting):**
 ```
 /agents     →  implementer-sonnet and implementer-haiku listed

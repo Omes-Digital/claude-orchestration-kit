@@ -6,6 +6,7 @@
 #   bash install.sh --with-vendor   also install the 15 vendored community skills
 #   bash install.sh --all           everything (same as --with-vendor)
 #   bash install.sh --check         doctor mode: report what's installed, change nothing
+#   bash install.sh --verify        integrity: check files against SHA256SUMS, change nothing
 #   bash install.sh --uninstall     preview which kit files would be removed (dry run)
 #   bash install.sh --uninstall --yes   actually remove the kit's files
 #   bash install.sh --help          show help
@@ -19,6 +20,7 @@ TARGET="${CLAUDE_HOME:-$HOME/.claude}"
 
 WITH_VENDOR=0
 CHECK=0
+VERIFY=0
 UNINSTALL=0
 ASSUME_YES=0
 BACKUP=""
@@ -36,6 +38,7 @@ Usage: bash install.sh [options]
   --with-vendor   also install the 15 vendored community skills
   --all           everything (same as --with-vendor)
   --check         doctor mode: report what's installed, change nothing
+  --verify        integrity check: verify files against SHA256SUMS, change nothing
   --uninstall     preview the kit files that would be removed (dry run; add --yes to delete)
   --yes           with --uninstall, actually remove (otherwise it only previews)
   --help          show this help
@@ -50,6 +53,7 @@ for arg in "$@"; do
   case "$arg" in
     --with-vendor|--all) WITH_VENDOR=1 ;;
     --check)             CHECK=1 ;;
+    --verify)            VERIFY=1 ;;
     --uninstall)         UNINSTALL=1 ;;
     --yes|-y)            ASSUME_YES=1 ;;
     -h|--help)           usage; exit 0 ;;
@@ -87,6 +91,36 @@ if [ "$CHECK" -eq 1 ]; then
     exit 1
   fi
   exit 0
+fi
+
+# ---- verify mode ----
+if [ "$VERIFY" -eq 1 ]; then
+  cd "$SRC"
+  if [ ! -f SHA256SUMS ]; then
+    echo "No SHA256SUMS found in $SRC." >&2
+    echo "Generate it first:  bash scripts/gen-checksums.sh" >&2
+    exit 1
+  fi
+  echo "Verifying $SRC against SHA256SUMS ..."
+  verify_tree() {
+    if command -v sha256sum >/dev/null 2>&1; then
+      sha256sum -c --quiet SHA256SUMS
+    elif command -v shasum >/dev/null 2>&1; then
+      local out st
+      out="$(shasum -a 256 -c SHA256SUMS 2>&1)"; st=$?
+      printf '%s\n' "$out" | grep -vE ': OK$' >&2 || true
+      return $st
+    else
+      echo "need sha256sum or shasum to verify" >&2; return 2
+    fi
+  }
+  if verify_tree; then
+    echo "  OK — all listed files match SHA256SUMS."
+    exit 0
+  else
+    echo "  FAILED — bytes differ from the manifest (see above). Do not trust this copy." >&2
+    exit 1
+  fi
 fi
 
 # ---- uninstall mode ----
