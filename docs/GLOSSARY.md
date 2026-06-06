@@ -15,11 +15,11 @@ It reads/writes files, runs commands, and can be personalized via the `~/.claude
 
 **Skill** — a reusable mini-workflow saved as a `SKILL.md` file. You trigger one by typing `/its-name`, or
 Claude picks it automatically when your request matches its description. Think "a saved recipe for a
-recurring task." This kit ships 5 of its own + 23 from the community.
+recurring task." This kit ships 8 of its own + 23 from the community.
 
 **Playbook (`CLAUDE.md`)** — a file of standing instructions Claude reads at the start of every session.
-This kit's `CLAUDE.md` teaches Claude the orchestration habits below. Putting it in `~/.claude/` makes it
-global; putting it in a project makes it project-only.
+This kit's `CLAUDE.md` teaches Claude the frontier-first working model below. Putting it in `~/.claude/` makes
+it global; putting it in a project makes it project-only.
 
 ## The orchestration idea
 
@@ -31,23 +31,26 @@ Tiering is an *optimization*, not a requirement — see the [FAQ](FAQ.md).
 tokens spent on judgement, not boilerplate.
 
 **Opus / Sonnet / Haiku** — Claude's model family from most to least powerful: **Opus** (deep reasoning),
-**Sonnet** (strong all-rounder), **Haiku** (fast and cheap). The kit uses Opus to plan and Sonnet/Haiku to
-execute — but you can run everything on one model if that's what you have.
+**Sonnet** (strong all-rounder), **Haiku** (fast and cheap). The kit does normal work *on Opus in one pass*,
+and only routes a big or parallel job's execution down to Sonnet/Haiku — and you can run everything on one
+model if that's what you have.
 
-**Architect** — the role your main Claude session plays in this kit: it designs, decides, writes the
-hand-off instructions, and reviews the result. Ideally an Opus session. It does *not* do the mechanical
-typing if that can be delegated.
+**Architect** — the role your main Claude session plays in this kit: it designs, decides, builds, and
+reviews. Ideally an Opus session. It does **most work directly, in one pass** — and only writes hand-off
+instructions to delegate when a task is too big for one context or fans out into parallel pieces.
 
-**Implementer** — a helper that does the bounded, well-specified work the architect hands it. Two tiers
-ship here: `implementer-haiku` (single-file mechanical edits) and `implementer-sonnet` (multi-file or
-trickier changes).
+**Implementer** — a helper the architect hands a well-specified slice of a *larger* job it has chosen to
+split or parallelize (not everyday work). Two tiers ship here: `implementer-haiku` (an independent
+single-file piece) and `implementer-sonnet` (a multi-file slice).
 
 **Sub-agent** — a separate Claude instance the main session spawns to do a focused job (an implementer is
 one kind). It has its own fresh context and reports back. Important rule: **a sub-agent cannot spawn another
 sub-agent.**
 
 **Dispatch** — handing a task from the architect to an implementer. The `dispatch` skill writes the formal
-hand-off (see *strict-mode contract*) and picks the tier.
+hand-off (see *strict-mode contract*) and picks the tier. It's the kit's **scaling exception**, not the
+default — for work that fits one session the architect just does it ([we measured](../ab-test/FINDINGS.md)
+that dispatching everyday work costs more).
 
 **Strict-mode contract** — the precise instructions an implementer must follow: which files it may touch,
 the exact change, what's off-limits, and how to verify. "Strict mode" = the implementer sticks to the

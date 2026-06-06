@@ -2,10 +2,10 @@
 
 A short, **illustrative** walkthrough of how the kit's pieces fit together on a real task. This is a
 narrated sketch, not a transcript to copy verbatim — your wording and Claude's exact replies will differ.
-The point is the *shape* of the loop: **align → dispatch → implement → review**.
+The point is the *shape* of the default loop — **align → build it in one pass → review** — and, separately,
+*when* you'd escalate to dispatch.
 
-> Setup: you've done a Level 3 install (`install.sh --all`) and you're in a project, talking to an
-> Opus session (the "architect").
+> Setup: you've installed at least Level 2 (`CLAUDE.md`) and you're in a project, talking to an Opus session.
 
 ---
 
@@ -37,40 +37,30 @@ You answer. Claude restates a **confirmed brief**:
 > Confidence — 96%
 
 **Why this step matters:** a wrong assumption here would cost a whole build-and-throw-away cycle. A few
-clarifying tokens on Opus is far cheaper. → [`align`](../skills/align/SKILL.md)
+clarifying tokens up front is far cheaper — and this is true whether you build it yourself or hand it off.
+`align` is the kit's highest-leverage habit. → [`align`](../skills/align/SKILL.md)
 
-## Step 2 — `/dispatch` (write the contract, pick the tier)
+## Step 2 — build it, in one pass, right here
 
-> **You:** dispatch this
+This is a single-file, well-specified change that fits comfortably in one context — so the cheapest, fastest
+thing is to **just do it on the Opus session you're already in.** No contract, no hand-off, no sub-agent.
 
-This is a single-file, well-specified change → the light tier (`implementer-haiku`). `dispatch` writes a
-**strict-mode contract**:
+> **You:** go
 
-```
-Tier:        implementer-haiku
-May touch:   src/cli/report.ts
-Change:      add `--json` boolean flag; when set, print JSON.stringify({data, meta})
-             instead of the table; default path unchanged.
-Deny-list:   do NOT modify the formatter lib, other commands, or tests outside report.
-Verify:      npm test -- report   &&   npm run report -- --json | jq .
-```
+Claude edits `src/cli/report.ts`, adds the flag, branches on it, and runs the checks inline (lean on `tdd`
+for the test and `diagnose` if something breaks — they sharpen a *single* pass, no orchestration needed):
 
-**Why this step matters:** the implementer gets exact scope and a way to check itself. The deny-list stops
-the change from sprawling. → [`dispatch`](../skills/dispatch/SKILL.md)
+> **Claude:** Added `--json` to `report` (+12 lines), with a test. `npm test -- report` → 14 passing.
+> `npm run report -- --json | jq .` → valid JSON. Default human output unchanged.
 
-## Step 3 — the implementer executes
+**Why not dispatch this?** Because we measured it: handing a one-context task to a cheaper sub-agent cost
+**+14–24% and ~2× the wall-clock for identical results** ([`../ab-test/FINDINGS.md`](../ab-test/FINDINGS.md)).
+The sub-agent would re-read files this session already has loaded, and you'd still pay Opus to design and
+review. For anything a single pass can hold, **in-session is the optimization.**
 
-The Haiku implementer makes the edit, re-reads it, runs the verify commands, and reports back:
+## Step 3 — review your own diff before the push moment
 
-> **implementer-haiku:** Changed `src/cli/report.ts` (+12 lines). `npm test -- report` → 14 passing.
-> `npm run report -- --json | jq .` → valid JSON. Done.
-
-It does **not** commit or push — that's your call. It would **halt and report** if, say, the change needed a
-second file (a sign the contract was wrong).
-
-## Step 4 — review comes back *up* a tier
-
-The architect (Opus) — never the implementer itself — reviews the diff:
+The work isn't done until it's checked. Run the rubric on the diff you just produced:
 
 > **You:** /review-diff   *(or the built-in `/code-review`)*
 
@@ -80,10 +70,12 @@ flag. Say it flags one thing:
 > **review-diff:** [required] `--json` doesn't suppress a stray `console.log` progress line, so output isn't
 > pure JSON. Everything else conforms to the brief.
 
-Quick fix (another tiny dispatch, or just do it inline), re-verify, and now **you** commit and push.
+Fix it inline, re-verify, and now **you** commit and push. (Want a genuinely independent critic — eyes that
+*didn't* write the code? That's a real reason to spin up a separate review agent; see "When you'd dispatch"
+below. For most changes, the rubric on your own diff is enough.)
 
-**Why this step matters:** the model that wrote the code is the worst judge of it. Review returns to a more
-capable tier. → [`review-diff`](../skills/review-diff/SKILL.md)
+**Why this step matters:** code is easiest to get wrong where you were most confident. A rubric pass before
+the push moment catches it. → [`review-diff`](../skills/review-diff/SKILL.md)
 
 ---
 
@@ -91,17 +83,43 @@ capable tier. → [`review-diff`](../skills/review-diff/SKILL.md)
 
 ```
 /align        you + Opus     →  agreed brief (no wrong-thing risk)
-/dispatch     Opus           →  precise contract, cheap tier chosen
-implement     Haiku          →  edit + self-verify, halts if surprised
+build         Opus, 1 pass   →  edit + test + self-verify, in-session (cheapest for one-context work)
 /review-diff  Opus           →  catch the one real issue
 you           human          →  commit + push
 ```
 
-Opus tokens were spent only on **judgement** (clarify, design the contract, review). The mechanical typing
-ran on cheap Haiku. Nothing was committed without your say-so.
+No sub-agent was spawned, and that's the point: a strong model held the whole task in one context, so adding
+a hand-off would only have added cost. Nothing was committed without your say-so.
+
+## When you *would* dispatch
+
+The loop above stays in-session because the task fit one context. Escalate to `/dispatch` only when one of
+these holds — the cases where orchestration actually earns its overhead:
+
+- **Too big for one context.** The same `--json` treatment across **40 command files**, or a migration that
+  won't fit in one session before quality degrades. Split it; farm the pieces out so each sub-agent (and your
+  architect session) stays lean.
+- **Genuinely parallelizable.** A dozen *independent* files with no shared state — fan them out concurrently
+  for a real wall-clock win (you pay more tokens for the speed).
+- **Fresh-eyes isolation.** You want a critic that hasn't seen your reasoning to adversarially review a risky
+  change.
+
+Then — and only then — `dispatch` writes the **strict-mode contract** and picks the tier:
+
+```
+Tier:        implementer-sonnet        (multi-file slice of a too-big job)
+May touch:   src/cli/{report,export,audit,...}.ts   (the lane assigned to this agent)
+Change:      add `--json` per the brief; default path unchanged.
+Deny-list:   formatter lib, other lanes' files, tests outside this lane.
+Verify:      npm test -- <lane>   &&   npm run <cmd> -- --json | jq .
+```
+
+Review still comes back **up** a tier (never let the implementer review itself), and **you** own the push
+moment. → [`dispatch`](../skills/dispatch/SKILL.md)
 
 ## Don't over-orchestrate
 
-For a true one-liner, skip all of this and just ask Claude to make the change — `dispatch` itself says
-"trivial → just do it." The loop earns its keep on tasks big or ambiguous enough that a wrong turn is
-expensive. See the [cheat-sheet](SKILL-CHEATSHEET.md) for picking the right tool per situation.
+The default is *not* to dispatch. For anything a single pass can hold — which is most work — just `align`,
+build, and review in-session. The hand-off machinery earns its keep only when a task outgrows one context or
+fans out cleanly. See the [cheat-sheet](SKILL-CHEATSHEET.md) for picking the right tool per situation, and
+[`../ab-test/FINDINGS.md`](../ab-test/FINDINGS.md) for why.

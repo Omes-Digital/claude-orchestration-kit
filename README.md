@@ -4,15 +4,15 @@
 > It has a 5-minute "try one skill" path and a one-command installer. The rest of this README is the
 > design rationale.
 
-A drop-in personalization layer for [Claude Code](https://claude.com/claude-code) that turns a single Opus session into a **tiered architect → implementer orchestration system**, with reusable skills and persistent per-role agent memory.
+A drop-in personalization layer for [Claude Code](https://claude.com/claude-code): a **disciplined frontier-first workflow** — a confidence gate before you build, reusable skills, context hygiene, and persistent per-role memory — with multi-agent **orchestration as an opt-in scaling tool**, not the default.
 
-The idea: keep a frontier model (Opus) as the **architect** doing design, contracts, and triage, and route bounded, well-specified work **down** to cheaper implementer tiers (Sonnet / Haiku). Frontier tokens stay on judgement; mechanical edits run cheap. Skills standardize the recurring workflows, and per-role memory stops agents from relearning the same craft every run.
+The honest idea (we measured it): for any task a strong model holds in one context, **do it yourself in one pass** — that's cheaper and faster than handing it off. We ran this kit's own [`ab-test/`](ab-test/README.md) harness and tiered dispatch cost **+14–24% and ~2× the wall-clock for identical correctness** ([findings](ab-test/FINDINGS.md)). So the kit leads with what actually pays every day — `align` (get the spec right before building), skills as methodology, context hygiene, and memory — and reserves architect→implementer tiering for the cases that genuinely earn it: work **too big for one context**, a **genuinely parallel** fan-out, or **fresh-eyes** review.
 
 ## What's in the box
 
 | Path | What it is |
 |---|---|
-| `CLAUDE.md` | The orchestration framework — tiering rules, skill routing, memory loop. Goes at `~/.claude/CLAUDE.md`. |
+| `CLAUDE.md` | The playbook — frontier-first working model, skill routing, context hygiene, memory loop (tiering is the gated scaling tool, not the default). Goes at `~/.claude/CLAUDE.md`. |
 | `agents/implementer-sonnet.md` | Heavy-tier strict-mode implementer (multi-file / cross-file invariants / schema risk). |
 | `agents/implementer-haiku.md` | Light-tier strict-mode implementer (single-file mechanical edits). |
 | `skills/align/` | Session-start alignment gate: diverge → ≥95% confidence in one batched question round → confirmed brief, *before* any work or dispatch. |
@@ -28,7 +28,7 @@ The idea: keep a frontier model (Opus) as the **architect** doing design, contra
 | `install.sh` / `install.ps1` | One-command installers (macOS/Linux · Windows) with backup, doctor (`--check`), and `--all`. |
 | `settings.example.json` | Beginner-safe `~/.claude/settings.json` baseline. |
 | `START-HERE.md` · `docs/` | Beginner on-ramp: glossary, skill cheat-sheet, worked example, FAQ. |
-| `ab-test/` | A self-run A/B harness to measure the kit vs a vanilla session on the same task (cost · speed · quality). Honest by design — see [`ab-test/README.md`](ab-test/README.md). |
+| `ab-test/` | A self-run A/B harness to measure the kit vs a vanilla session on the same task (cost · speed · quality). We ran it — the results [reframed this kit](ab-test/FINDINGS.md). Honest by design — see [`ab-test/README.md`](ab-test/README.md). |
 
 > The `vendor/` skills are third-party MIT-licensed work redistributed with their original
 > license + attribution — see [`THIRD_PARTY_LICENSES.md`](THIRD_PARTY_LICENSES.md). They are
@@ -37,26 +37,27 @@ The idea: keep a frontier model (Opus) as the **architect** doing design, contra
 ## The core idea in one diagram
 
 ```
-        ┌─────────────────────────────────────────────┐
-        │  /align  — confidence gate (≥95%) before work │
-        │  diverge · question once · confirmed brief    │
-        └───────────────┬─────────────────────────────┘
-                        ▼
-        ┌─────────────────────────────────────────────┐
-        │  ARCHITECT  (Opus, this session)            │
-        │  design · contract · triage · review        │
-        └───────────────┬─────────────────────────────┘
-            dispatch contract (file list + exact change + verify cmd)
-        ┌───────────────┴───────────────┐
-        ▼                               ▼
-  implementer-haiku              implementer-sonnet
-  single-file / mechanical       multi-file / cross-file / schema
-        │                               │
-        └──────────── returns diff ─────┘
-                        ▼
-        review returns to the MORE capable tier
-        (never self-review) → code-review / review-diff
+        ┌──────────────────────────────────────────────────┐
+        │  /align — confidence gate (≥95%) before you build │
+        │  diverge · question once · confirmed brief        │
+        └───────────────────────┬──────────────────────────┘
+                                ▼
+        ┌──────────────────────────────────────────────────┐
+        │  DO IT IN ONE PASS  (Opus, this session)          │  ◀─ the default:
+        │  design · build · tdd / diagnose · review my diff │     cheapest & fastest for
+        └───────────────────────┬──────────────────────────┘     anything that fits one context
+                                │
+       too big for one context?  ·  genuinely parallel?  ·  want fresh eyes?
+                       │ no ──▶ you're done            │ yes
+                                                        ▼
+        ┌──────────────────────────────────────────────────┐
+        │  ORCHESTRATE — dispatch a strict contract         │  ◀─ the exception:
+        │  architect → implementer-haiku / -sonnet → review │     earns its overhead only at scale
+        └──────────────────────────────────────────────────┘
 ```
+
+> Why this shape and not "architect dispatches everything"? Because we measured the everyday case
+> and dispatch lost — see [`ab-test/FINDINGS.md`](ab-test/FINDINGS.md).
 
 <!-- SCREENSHOT (optional): a real diagram or a terminal capture of the flow in action.
      Save as docs/assets/flow-diagram.png and embed here. See docs/assets/README.md. -->
@@ -95,7 +96,7 @@ Full details, manual steps, and Windows notes are in [`INSTALL.md`](INSTALL.md).
 
 ## Design notes / credits
 
-- Tiering + strict-mode executor rules follow the *Plan → Execute → Review* pipeline (review always returns to a more-capable tier; never self-review).
+- **Frontier-first by measurement.** We A/B-tested the kit against a vanilla session ([`ab-test/FINDINGS.md`](ab-test/FINDINGS.md)); tiered dispatch cost more for identical results on everyday work, so it's reserved for scale. The tiering that remains follows the *Plan → Execute → Review* pipeline (review always returns to a more-capable tier; never self-review).
 - Four of the original five top-level skills (`dispatch`, `tdd`, `diagnose`, `review-diff`) are best-of-each merges of community skill packs (Matt Pocock, superpowers / Jesse Vincent, Addy Osmani) and Anthropic's `pr-review-toolkit`. The other four are **original to this kit**: `align` (the confidence gate that runs *before* dispatch) and the three small sub-agent disciplines `scope-guard`, `reread-before-edit`, and `verify-and-report`.
 - The `vendor/` skills are redistributed **unmodified** from [`mattpocock/skills`](https://github.com/mattpocock/skills) and [`obra/superpowers`](https://github.com/obra/superpowers), both MIT — full attribution in [`THIRD_PARTY_LICENSES.md`](THIRD_PARTY_LICENSES.md). All credit for those goes to their respective authors.
 - The memory layer is grounded in CoALA (episodic/semantic/procedural), Cline's Memory Bank, and Anthropic's context-engineering guidance.

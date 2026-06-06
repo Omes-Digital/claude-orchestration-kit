@@ -1,13 +1,13 @@
 ---
 name: align
-description: Session-start alignment gate — diverge on the request, reason every interpretation, and drive to ≥95% confidence in ONE batched question round before any work begins, then hand a confirmed brief to /dispatch. Runs the whole session in caveman mode for token economy. Use at the start of a session, when a request is ambiguous or under-specified, when you say "align", "/align", "make sure you understand", "what do you think I mean", "diverge first", or before delegating to implementers when scope is fuzzy.
+description: Session-start alignment gate — diverge on the request, reason every interpretation, and drive to ≥95% confidence in ONE batched question round before any work begins, then emit a confirmed brief and start the work (usually right here in a single in-session pass; dispatch downstream only if the task is too big for one context or genuinely parallel). The kit's highest-leverage habit — getting the spec right prevents the most expensive failure in AI coding, building the wrong thing, whether you build it yourself or hand it off. Runs the whole session in caveman mode for token economy. Use at the start of a session, when a request is ambiguous or under-specified, when you say "align", "/align", "make sure you understand", "what do you think I mean", "diverge first", or before any non-trivial build.
 ---
 
 # Align — confidence gate before work
 
-Diverge on the request, reason each interpretation, **reach ≥95% confidence in one batched question round**, then emit a confirmed brief and hand to `/dispatch`. Front-load understanding so cheap implementers never execute the wrong contract. Pairs with `~/.claude/CLAUDE.md` §Agent Orchestration: this is the step *before* the contract.
+Diverge on the request, reason each interpretation, **reach ≥95% confidence in one batched question round**, then emit a confirmed brief and start the work — usually right here in one pass on the strong model. Front-load understanding so the build (yours, or a sub-agent's if you later dispatch) never targets the wrong thing. This is the kit's **highest-leverage habit**: the most expensive failure in AI coding isn't a bug, it's building the wrong thing, and one question round prevents a whole rebuild. Pairs with `~/.claude/CLAUDE.md` §Working model: it runs *before* anything else, dispatch or not.
 
-**Core principle.** A wrong contract dispatched to Haiku costs more than a question asked on Opus. Spend a few frontier tokens here to save a whole mis-built sprint. Do NOT touch code, files, or sub-agents until the brief is locked.
+**Core principle.** A wrong build costs far more than a question asked up front — whether you build it yourself or dispatch it. Spend a few frontier tokens here to save a whole mis-built sprint. Do NOT touch code, files, or sub-agents until the brief is locked.
 
 ## Token economy — levers in priority order
 
@@ -16,7 +16,7 @@ Align is the cheap part; the real token sink is downstream (file reads, implemen
 1. **Fewer round-trips.** Dominant cost is input/context re-processed every turn, not output. One batched question round (§4) ≫ ten one-offs. Each avoided round-trip saves more than caveman does. Target 1 round, cap 2.
 2. **Read before you ask.** Memory + repo first (§1). A question answerable from `MEMORY.md` that you ask anyway burns a whole round-trip.
 3. **Caveman.** Cuts output ~75% (§0). Real but smaller — output is the minority of token cost.
-4. **Tier hard at handoff.** 80%+ of session tokens live downstream. Keep judgement on Opus, route execution to Haiku/Sonnet via `/dispatch` (§6). Getting the brief right is what makes the cheap tier run once, not twice.
+4. **Right model, one pass.** The real token sink is downstream implementation. Getting the brief right is what makes that pass run *once* instead of twice — which matters far more than *which* model runs it. Do the work in-session on the strong model by default; tier down via `/dispatch` only when the task is too big for one context or genuinely parallel (§6). A wrong brief re-built is the expensive waste; align prevents it either way.
 
 Don't invert this order. Shaving align's output (caveman) while allowing a second avoidable question round is a net loss.
 
@@ -74,7 +74,7 @@ Confidence — NN%
 ## 6. Hand off
 
 Offer the next step, don't auto-run:
-- Bounded + specified → `/dispatch` (it writes the strict contract + picks tier).
+- Bounded + specified → **just do it here, in one pass** on the strong model (the cheapest, fastest path for anything that fits one context). Reach for `/dispatch` only if it's a scaling case: too big for one context, genuinely parallelizable, or you want fresh-eyes isolation.
 - Still design-heavy → keep on Opus; suggest a Plan agent or `grill-me`.
 - Trivial → just do it.
 

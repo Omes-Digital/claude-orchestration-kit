@@ -100,8 +100,10 @@ The bash version needs `jq`; it spends no tokens.
 Long architect sessions get re-processed every turn, which is slow and pricey. Two habits (both in
 `CLAUDE.md` → *Context hygiene*): run **`/compact`** at a natural breakpoint (after a batch of work, before
 an unrelated task) to summarize and free space, and **`/clear`** when the next task shares nothing with the
-last (a full reset beats carrying a summary). Routing bounded work to an implementer via `/dispatch` also
-keeps that work *out* of your main session's context.
+last (a full reset beats carrying a summary). Splitting a *genuinely large* task across implementers via
+`/dispatch` keeps their file-reads out of your main session too — but that only pays when the task is too big
+for one context; for normal work, dispatching adds cost (see [`../ab-test/FINDINGS.md`](../ab-test/FINDINGS.md)),
+so prefer `/compact` and `/clear`.
 
 ## Skills
 

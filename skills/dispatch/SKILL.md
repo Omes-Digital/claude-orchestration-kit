@@ -1,15 +1,22 @@
 ---
 name: dispatch
-description: Architect→implementer orchestration. Use when delegating, dispatching, or handing off implementation to implementer-sonnet or implementer-haiku; when deciding which tier (Haiku vs Sonnet vs keep-on-Opus) a task belongs to; when executing a multi-task plan with sub-agents; or when you say "dispatch this", "delegate this", "hand this off", "execute the plan", "run this with implementers", "write the contract". Produces a strict-mode contract (tier · file inventory · exact per-file change · deny-list · verification matrix), runs the implementer loop with a two-stage review gate and evidence-based acceptance, and supports parallel fan-out for independent work — so frontier (Opus) tokens stay on design and triage.
+description: Architect→implementer orchestration — the kit's opt-in SCALING tool, not a default. Use it ONLY when work is too big for one context, genuinely parallelizable (independent sub-tasks, real wall-clock win), or needs fresh-eyes isolation — for normal bounded work that fits one session, a single in-session pass on the strong model is measurably cheaper and faster (see ab-test/FINDINGS.md), so do NOT dispatch by reflex. When one of those scaling reasons holds and you delegate / hand off to implementer-sonnet or implementer-haiku, decide which tier (Haiku vs Sonnet vs keep-on-Opus) a task belongs to, execute a multi-task plan with sub-agents, fan out independent work, or say "dispatch this", "delegate this", "hand this off", "execute the plan", "write the contract": this produces a strict-mode contract (tier · file inventory · exact per-file change · deny-list · verification matrix), runs the implementer loop with a two-stage review gate and evidence-based acceptance, and supports parallel fan-out.
 ---
 
 # Dispatch — architect→implementer orchestration
 
-Turn bounded, specified work into a **strict-mode contract**, route it to the right implementer tier, and drive it through review + verification to acceptance. The architect (Opus) writes the contract and judges; cheap implementers execute it verbatim. This operationalises `~/.claude/CLAUDE.md` §Agent Orchestration.
+Turn bounded, specified work into a **strict-mode contract**, route it to the right implementer tier, and drive it through review + verification to acceptance. The architect (Opus) writes the contract and judges; cheap implementers execute it verbatim. This operationalises `~/.claude/CLAUDE.md` §Working model — and runs only *after* you've cleared its gate (too big for one context · genuinely parallel · fresh-eyes); for work that fits one in-session pass, don't come here.
 
-**Core principle.** Frontier tokens are for design, contracts, and triage — not mechanical edits. Use the least powerful model that can do each role. **Implementers never inherit your session history — you construct exactly the context they need.** Evidence before completion, always.
+**Core principle.** Dispatch is a **scaling tool, not a default.** Measured on this kit's own `ab-test/` harness, routing everyday bounded work to a sub-agent cost **+14–24% and ~2× the wall-clock for identical correctness** — you pay the architect to design+review *and* a sub-agent to re-read+implement, which beats one in-session pass only when that pass can't hold the task. So before writing a contract, clear the gate.
 
-**Only dispatch bounded, specified work.** If it's still a design question, cross-file judgement call, or triage — keep it on Opus. Dispatch is "I know exactly what to change," not "figure out what to do."
+**The gate — dispatch only if at least one holds:**
+- **Too big for one context** — the work won't fit in one session before quality degrades; splitting it keeps each piece (and the architect) lean.
+- **Genuinely parallelizable** — independent sub-tasks, no shared state, run concurrently for a real wall-clock win.
+- **Fresh-eyes isolation** — you want a critic that hasn't seen your reasoning.
+
+If none hold, **keep it on Opus and do it in one pass** — that's cheaper and faster. And as before: if it's still a design question, cross-file judgement call, or triage, it isn't dispatchable anyway. Dispatch is "I know exactly what to change *and* there's a scaling reason to hand it off" — not "figure out what to do," and not "a cheaper model should do the typing."
+
+When you do dispatch: **implementers never inherit your session history — you construct exactly the context they need.** Evidence before completion, always.
 
 ## 1. Route — pick the shape first
 
@@ -18,7 +25,7 @@ Turn bounded, specified work into a **strict-mode contract**, route it to the ri
 | **Single contract** | One bounded change | §2 → §3 → §5 → §6 → §7 |
 | **Plan loop** | N dependent tasks, sequential | §8 |
 | **Parallel fan-out** | N *independent* tasks, no shared state | §9 |
-| **Keep on Opus** | Genuine design / cross-file judgement / triage | don't dispatch |
+| **Keep on Opus (default)** | Design, cross-file judgement, triage — **or any task a single in-session pass can hold** (most work) | don't dispatch |
 
 ## 2. Pick the tier
 

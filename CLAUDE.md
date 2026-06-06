@@ -1,25 +1,61 @@
 # Global instructions (all projects)
 
-> Drop-in agent-orchestration layer for Claude Code. Put this file at `~/.claude/CLAUDE.md`
-> (or paste the section below into your existing one). It pairs with the `agents/`,
-> `skills/`, and `agent-memory/` directories in this bundle. See `INSTALL.md`.
+> A disciplined **frontier-first** workflow for Claude Code, with multi-agent orchestration as an
+> **opt-in scaling tool** — not the default. Put this file at `~/.claude/CLAUDE.md` (or paste the
+> sections below into your existing one). It pairs with the `agents/`, `skills/`, and `agent-memory/`
+> directories in this bundle. See `INSTALL.md`.
+>
+> **Why "opt-in"?** This kit ships an A/B harness (`ab-test/`) and we ran it. Across three tasks
+> (greenfield → a cross-cutting change in an existing repo), routing bounded work down to cheaper
+> sub-agents cost **+14–24%** and **~2× the wall-clock** for **identical** correctness — a frontier
+> model held each task in one pass and the review gate caught nothing. So the guidance below is
+> frontier-first: do the work yourself; orchestrate only to *scale*. Receipts: `ab-test/FINDINGS.md`.
 >
 > **New here?** This file shapes how Claude behaves in *every* project. Adopt it deliberately —
 > see `START-HERE.md` (Level 2), and start with just a skill or two if you're not ready for that.
 
-## Agent Orchestration — tier by task weight
+## Working model — frontier-first; orchestrate only to scale
 
-Keep a frontier model as the **architect**; route bounded work **down** to a cheaper model. Frontier tokens are for design, cross-file judgement, and triage — not for mechanical edits. This is how you get the most from a token budget.
+**Default: do the work yourself, in this session, on the strongest model you have.** A capable frontier model (Opus) holds a normal task — including a cross-cutting change across an existing multi-file codebase — in one context and gets it right in a single pass. Spend your tokens on *doing the task well*, not on the machinery of handing it off.
 
-| Tier | Model | Use for |
+**This kit measured its own dispatch, and on everyday work it lost.** We ran the bundled `ab-test/` harness on three tasks — a greenfield warm-up, a complex parser, and a cross-cutting change to an *existing* repo (the regime tiering is supposedly built for). Every time, routing the bounded implementation down to a cheaper sub-agent cost **more money and ~2× the wall-clock for identical correctness** — both arms passed, zero rework, zero regressions, no dropped layers:
+
+| Task | Vanilla (one Opus pass) | Kit (architect → sub-agent) | Δ cost | Δ API time |
+|---|---|---|---|---|
+| Expense tracker (greenfield) | $0.87 | $0.99 | **+14%** | 2m06s → 3m58s |
+| Calc language (complex parser) | $1.09 | $1.25 | **+15%** | 2m41s → 4m53s |
+| Due-dates in an existing repo (cross-cutting) | $2.19 | $2.71 | **+24%** | 5m09s → 10m07s |
+
+The overhead *grows* toward existing-code work because of an **isolation tax**: the sub-agent re-reads files the architect already loaded (on the cross-cutting task the Sonnet implementer re-read the whole repo — 1.1M cache tokens *on top of* the architect's 1.3M). You pay Opus to design **and** review, **and** a second model to re-read **and** implement — strictly more than Opus doing it once. The two-stage review gate caught nothing, because a single frontier pass didn't fail. Full write-up + caveats: [`ab-test/FINDINGS.md`](ab-test/FINDINGS.md).
+
+**So orchestrate only when it genuinely pays — never by reflex:**
+- **Too big for one context.** The work spans more files/tokens than fit in one session before quality degrades (context rot). *Then* split it and farm out the pieces — the architect stays lean because each sub-agent's reads land in *its* context, not yours. (The one case the A/B did **not** test — all three tasks fit one context. It's the real use; measure it on your own work before trusting it.)
+- **Genuinely parallelizable.** Independent sub-tasks, no shared state, run concurrently for a real wall-clock win — a broad audit, a wide migration, N independent files. Fan-out buys *speed* at *higher* token cost; spend it only when wall-clock matters. (Also untested above — the A/B ran one serial dispatch, which is *why* it was slower.)
+- **Fresh-eyes isolation.** An independent critic that hasn't seen your reasoning, for adversarial review of a risky change. Real, but orthogonal to cost.
+
+If none of those hold — and for most single-session features none do — **just do it here, in one pass.** When you *do* orchestrate one of the cases above, route by weight:
+
+| Tier | Model | Use for (only in the scaling cases above) |
 |---|---|---|
-| **Architect** | Opus (this session) | Design, drafting contracts, cross-file judgement, triage. Only role that amends a contract. |
-| **Implementer — heavy** | `implementer-sonnet` (Sonnet) | Multi-file changes, cross-file invariants, schema/migration risk, service splits. Escalated default when task weight is unclear. |
-| **Implementer — light** | `implementer-haiku` (Haiku) | Single-file, tightly-scoped, mechanical edits with no cross-file invariants. |
+| **Architect** | Opus (this session) | Design, the contract, cross-file judgement, review. Does most normal work *directly*. |
+| **Implementer — heavy** | `implementer-sonnet` (Sonnet) | A large multi-file slice of a too-big-for-one-context job; one lane of a parallel fan-out. |
+| **Implementer — light** | `implementer-haiku` (Haiku) | A genuinely independent, mechanical single-file piece of a larger split. |
 
-**As the architect:** for any implementation that is bounded and well-specified, hand it to `implementer-haiku` (single-file/mechanical) or `implementer-sonnet` (multi-file/cross-cutting) instead of doing it on Opus tokens. Give the sub-agent an explicit file list, the exact change, and the verification command. Reserve Opus for the design, the contract, and reviewing what comes back. When weight is unclear, escalate to Sonnet.
+Give any sub-agent an explicit file list, the exact change, and the verification command — and review what comes back. But the first question is always: *could I just do this here in one pass?* Usually, yes.
 
-**Strict-mode executor rules** (what the implementers follow, and what the architect enforces when reviewing their output):
+### What actually carries the value (it isn't the tiering)
+
+The measurements indict *reflexive dispatch*, not the kit. What earns its keep every day — whether or not you ever spawn a sub-agent — is, in priority order:
+
+- **`align`** — getting the spec right *before* you build. The expensive failure in AI coding isn't a bug, it's building the wrong thing; one batched question round prevents a whole rebuild. The A/B couldn't even measure this (both arms got the same locked spec), which means align's value is *additional* to everything above.
+- **Skills as methodology** — `tdd`, `diagnose`, `review-diff` sharpen a *single* pass. No orchestration required; they make the in-session work better.
+- **Context hygiene** — `/compact` at breakpoints, `/clear` at boundaries, the optional meter. Model-agnostic, every session (see below).
+- **Per-role memory** — agents stop relearning the same craft each run (see below).
+- **Strict-mode discipline** — re-read before editing, verify with fresh evidence, halt on FAIL, never destructive-git, the human owns the push. Good practice solo; essential when you dispatch.
+
+Read the rest of this file in that order: align and discipline first, orchestration last and only when it pays.
+
+**Strict-mode executor rules** — what a sub-agent follows when you *do* dispatch, and what the architect enforces on the returned diff. The same discipline (re-read before editing, halt on FAIL, fresh-evidence verification, no destructive git) is worth keeping when you work solo too:
 - Touch only the files named in the task; the out-of-scope list is a deny-list.
 - Halt on the first FAIL or any unexpected state; report verbatim — no improvised recovery.
 - Never amend the contract mid-execution; record the bug for the architect.
@@ -47,19 +83,19 @@ Skills are reusable prompts/workflows. Route them by phase and tier. **Mechanics
 | Manage / handoff | Architect | `handoff` · `caveman` · `loop` · `schedule` |
 | Harness / config | Architect (main only) | `update-config` · `fewer-permission-prompts` · `keybindings-help` |
 
-**Default play.** (0) Ambiguous or under-specified request → `align` first: diverge, drive to ≥95% confidence in one batched question round, emit a confirmed brief — *before* spending tokens on the wrong contract. (1) Heavy or unclear design → keep on Opus; reach for a design skill (`grill-me` / `prototype`). (2) Bounded work → invoke `dispatch` to write the contract and pick the tier, then hand to **implementer-sonnet** (multi-file) or **implementer-haiku** (single-file). (3) The implementer reaches for `tdd` / `diagnose` while building and ends with `verify` / `run`. (4) Back on Opus: `code-review` (or `ultra`), `simplify`, `security-review` on the diff before the human's push moment.
+**Default play (frontier-first).** (0) **Ambiguous or under-specified?** → `align` first: drive to ≥95% confidence in one batched question round, emit a confirmed brief — the highest-leverage habit in the kit. (1) **Design-heavy?** → keep on Opus; reach for a design skill (`grill-me` / `prototype`). (2) **Bounded, well-specified work?** → **just do it here, in one pass.** Use `tdd` / `diagnose` as methodology while you build, and `review-diff` / `code-review` / `simplify` on your *own* diff before the human's push moment — no orchestration needed. (3) **Only if the task is too big for one context or genuinely parallelizable** → `dispatch` to split and fan out (see *Working model*), then review what returns on Opus. For everyday feature work you stop at (2).
 
 **Hard rule:** never delegate an orchestrating skill (`deep-research`, `code-review ultra`, `dispatch`) into a spawned implementer — sub-agents can't spawn sub-agents. Run those in the architect session. Don't preload situational skills into implementers via the `skills:` frontmatter (it injects full text every run and bloats the cheap tier) — they're discoverable for on-demand invocation already.
 
 **The bundled skills** (in `skills/`):
-- `align` — session-start confidence gate: diverge on the request, reason each reading, reach ≥95% confidence in **one batched question round**, then emit a confirmed brief and hand to `dispatch`. The step *before* the contract — a wrong contract dispatched to a cheap tier costs more than a question asked on Opus. (Original to this kit.)
-- `dispatch` — the orchestration centerpiece: strict-mode contract + tier pick + two-stage review gate (spec→quality) + evidence-based acceptance + plan-loop + parallel fan-out.
+- `align` — session-start confidence gate: diverge on the request, reason each reading, reach ≥95% confidence in **one batched question round**, then emit a confirmed brief and start the work — usually right here in one pass. The kit's **highest-leverage habit**: a question asked up front costs far less than building the wrong thing, whether you build it or dispatch it. (Original to this kit.)
+- `dispatch` — the **opt-in scaling tool** (not the default): strict-mode contract + tier pick + two-stage review gate (spec→quality) + evidence-based acceptance + plan-loop + parallel fan-out. Reach for it only when a task is too big for one context, genuinely parallelizable, or wants fresh-eyes review — for normal bounded work, one in-session pass on Opus is measurably cheaper and faster (see *Working model*).
 - `tdd` — Iron Law (no prod code without a failing test) + vertical-slice/tracer-bullet + a test-design toolkit + test taxonomy.
 - `diagnose` — feedback-loop-first + root-cause Iron Law + 3-fix→question-architecture + error-recovery/untrusted-error-output.
 - `review-diff` — multi-axis rubric + ≥80 confidence gate + severity labels + spec-vs-standards split; the rubric behind `dispatch`'s review gate (complements the built-in `/code-review`).
 - `scope-guard` · `reread-before-edit` · `verify-and-report` — three **small sub-agent disciplines** for the cheap implementer tier: stay inside the contract's file list and escalate clean; land every edit on the right bytes (re-read + anchor + re-read); close with a verbatim PASS/FAIL evidence block + a memory proposal. Distilled from the implementer agent-def rules into discrete, *on-demand* skills (not preloaded — they stay discoverable without bloating the cheap tier).
 
-**Tier selection.** Use the *Plan → Execute → Review* pipeline: architect drafts the contract (Opus) → implementer executes (Haiku/Sonnet) → **review returns to the more capable tier** (Opus/Sonnet), never self-review. Haiku gate = "well-defined spec / established pattern / deterministic," not merely "small." **Forced-Opus triggers** (never let Sonnet silently absorb these): security-sensitive changes, cross-file invariant *design*, schema/migration risk. When weight is genuinely unknown, decide the tier at dispatch time rather than baking it in (default escalates to Sonnet). Reinforce context-isolation: each implementer sees only its contract's named files (the deny-list is the token-economy lever). Use bare `Opus`/`Sonnet`/`Haiku` — no version pins.
+**Tier selection** (only once you've cleared the *Working model* gate and decided to orchestrate). Use the *Plan → Execute → Review* pipeline: architect drafts the contract (Opus) → implementer executes (Haiku/Sonnet) → **review returns to the more capable tier** (Opus/Sonnet), never self-review. Haiku gate = "well-defined spec / established pattern / deterministic," not merely "small." **Forced-Opus triggers** (never let Sonnet silently absorb these): security-sensitive changes, cross-file invariant *design*, schema/migration risk. When weight is genuinely unknown, decide the tier at dispatch time rather than baking it in (default escalates to Sonnet). Know the trade-off isolation actually makes: a sub-agent sees only its contract's named files, which keeps the architect's context lean **but** forces the sub-agent to *re-read* anything it needs that you already read — a duplication tax that's cheap when the slice is large and self-contained, expensive when it isn't (measured in `ab-test/`). Isolate to scale, not by reflex. Use bare `Opus`/`Sonnet`/`Haiku` — no version pins.
 
 ### Context hygiene — keep the architect lean
 
@@ -67,7 +103,7 @@ Frontier context is re-processed **every turn**, so a bloated architect session 
 
 - **Recommend `/compact` at breakpoints, not at a magic number.** The model can't read its own live token count, so don't wait for a threshold to hit — proactively suggest `/compact` after a *cluster of work*: several dispatched implementers have returned, a big file/research dump is now stale, or you're about to pivot to an unrelated task. Context compacted between tasks is context you don't pay to re-read. But remember `/compact` is a **lossy summary** — it frees space by dropping detail (exact code, decisions), so compact at a *clean breakpoint*, never mid-task where you still need the precision.
 - **`/clear` at a clean boundary** beats `/compact` when the next task shares nothing with the last — a full reset is cheaper than carrying a summary.
-- **Dispatch *is* context hygiene.** Routing bounded work to an implementer keeps its file reads and trial-and-error *out* of the architect's context. The deny-list is a token-economy lever, not only a safety rail.
+- **Dispatch is context hygiene *only at scale*.** Routing a *large, self-contained* slice to a sub-agent keeps its reads out of your context. But for small or existing-code work it backfires — the sub-agent re-reads the repo you already loaded, so you pay for that context twice (measured in `ab-test/`). Isolate to scale, not by reflex.
 - **Optional live meter.** Enable the kit's status line (`scripts/statusline.sh` / `statusline.ps1`): it shows `ctx NN% · Nk` and turns yellow with a `/compact` nudge. Defaults are **model-aware window %** — the Opus architect nudges earlier than the cheaper implementer tiers (**Opus 40%**, other models **60%**). Note % is window-relative: 40% is ~80k tokens on a 200k model but ~400k on a 1M-context one (so a big-window Opus gets lots of headroom before it warns). To cap by absolute size instead, set `KIT_COMPACT_TOKENS` (off by default); override the percent with `KIT_COMPACT_AT`. Opt-in — see `INSTALL.md` §2.
 
 ### Agent memory & self-improvement

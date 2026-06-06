@@ -10,8 +10,10 @@ terminal. It can be *personalized* with files in a folder called `~/.claude` (on
 `%USERPROFILE%\.claude`). This kit is a bundle of those personalization files — **skills** (reusable
 mini-workflows you trigger with `/name`), **agent definitions** (helpers Claude can hand work to), a
 **playbook** (`CLAUDE.md`, habits Claude follows in every project), and **memory seeds**. Together they
-turn Claude Code into a more disciplined, cost-aware coding partner. You do **not** have to install all of
-it — start small.
+turn Claude Code into a more disciplined, cost-aware coding partner. The everyday value is the discipline —
+good questions before building, methodology, context hygiene, memory; the multi-agent *orchestration* is an
+opt-in tool for big or parallel jobs, **not a destination you have to reach**. You do **not** have to install
+all of it — start small.
 
 ## Pick your level
 
@@ -57,11 +59,14 @@ The installer backs up anything it touches and **won't overwrite** an existing `
 > ⚠️ **Heads up:** `CLAUDE.md` shapes how Claude behaves in **every** project on your machine. That's
 > the point — but adopt it only when you want that. You can always delete `~/.claude/CLAUDE.md` to undo it.
 
-### 🔵 Level 3 — Full orchestration
+### 🔵 Level 3 — Orchestration, for when a task outgrows one session
 
-The whole system: the `implementer-*` agents and the vendored skills, used as a pipeline —
-**align → dispatch → implement → review**. Best when you have access to multiple Claude models (see the
-"Do I need Opus?" note below).
+The scaling tier: the `implementer-*` agents and the **align → dispatch → implement → review** pipeline.
+**Most work never needs this** — a strong model handles a normal task in one pass, and we measured tiered
+dispatch costing *more* for identical results on everyday work ([findings](ab-test/FINDINGS.md)). Reach for
+Level 3 only when a task is **too big for one context**, **genuinely parallelizable**, or you want
+**fresh-eyes** review. Best when you have access to multiple Claude models (see the "Do I need Opus?" note
+below).
 
 ```bash
 # macOS / Linux — installs everything, including vendored skills
@@ -72,7 +77,7 @@ bash install.sh --all
 pwsh -File install.ps1 -All
 ```
 
-Read [`CLAUDE.md`](CLAUDE.md) to understand the flow, and walk through the
+Read [`CLAUDE.md`](CLAUDE.md) §Working model to understand *when* to reach for it, and walk through the
 [**worked example**](docs/EXAMPLE.md) to see it in action.
 
 ## Do I need Opus? Will this cost a lot?

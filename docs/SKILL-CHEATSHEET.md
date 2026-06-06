@@ -9,11 +9,16 @@ Claude usually picks the right one.
 
 | I want to… | Skill | What it does |
 |---|---|---|
-| Make sure Claude understood me before it starts | **`/align`** | Asks the few clarifying questions that matter, in one round, then states a confirmed brief. |
-| Hand a clear task off to a cheaper/faster model | **`/dispatch`** | Writes the precise hand-off (files · change · verify) and picks the right tier. |
+| Make sure Claude understood me before it starts | **`/align`** | Asks the few clarifying questions that matter, in one round, then states a confirmed brief. The highest-leverage habit here. |
 | Figure out why something's broken | **`/diagnose`** | Reproduce → hypothesise → instrument → fix the *root* cause → regression-test. |
 | Build a feature test-first | **`/tdd`** | Red-green-refactor: failing test first, then the code to pass it. |
 | Review changes before I commit | **`/review-diff`** | Multi-axis rubric (bugs, security, tests, …) with a confidence gate. |
+| **Scale** a task too big for one session, or fan out parallel work | **`/dispatch`** | Writes the precise hand-off (files · change · verify) and picks the tier. *Not for everyday work* — a strong model does that in one pass ([why](../ab-test/FINDINGS.md)). |
+
+> **The default isn't a hand-off.** For anything that fits one context, do it in-session on your strongest
+> model — measurably cheaper and faster than dispatching ([findings](../ab-test/FINDINGS.md)). `dispatch` is
+> the *scaling* exception (too big for one context · genuinely parallel · fresh-eyes review), not step two of
+> every task.
 
 ## By phase
 
@@ -39,7 +44,7 @@ Claude usually picks the right one.
 ### 🔨 Build
 | Goal | Skill | Source |
 |---|---|---|
-| Hand bounded work to an implementer | `dispatch` | bundled |
+| Scale work too big for one session / fan out independent pieces | `dispatch` | bundled |
 | Build/fix test-first | `tdd` or `test-driven-development` | bundled / vendor |
 | Debug methodically | `diagnose` or `systematic-debugging` | bundled / vendor |
 | Run independent work in parallel safely | `dispatching-parallel-agents`, `using-git-worktrees` | vendor (superpowers) |

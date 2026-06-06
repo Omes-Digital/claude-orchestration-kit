@@ -3,6 +3,12 @@
 Generic studies won't tell you whether this kit improves *your* workflow. This runs the **same task twice** —
 once with the kit, once vanilla — so you can compare cost, speed, and quality on your own setup.
 
+> **We already ran it — and the results reframed this kit.** See [`FINDINGS.md`](FINDINGS.md): on three
+> tasks, the kit's tiered dispatch cost **+14–24% and ~2× the wall-clock for identical correctness**, which
+> is why the kit is now *frontier-first* and treats orchestration as opt-in. The harness below lets you
+> reproduce that — or challenge it on the cases it couldn't test (work too big for one context, or genuine
+> fan-out).
+
 Each task lives in its own folder, with three self-contained files. The two arms **must** be separate fresh
 chats (you can't fairly run both conditions in one context):
 
@@ -34,11 +40,13 @@ file's `COST_USD` line, and note the wall-clock.
 - Let each arm behave per its file — System uses the full workflow, Vanilla stays plain.
 
 ## Reading it honestly
-One run is an **anecdote, not proof**. Expect the System arm to often cost **more in $ and wall-clock** on
-small tasks (more thoroughness, more round-trips) — that's the overhead. The kit's edge, if it exists, should
-surface on the **complex** task as *fewer rework rounds / first-pass correctness* where a single vanilla pass
-trips on something (precedence, associativity, an error path). `SELF QUALITY` is self-rated and not
-comparable across arms — lean on acceptance, rework rounds, cost, and time. And remember the perception trap:
-*feeling* faster is not *being* faster. For a real signal, repeat across several varied tasks.
+One run is an **anecdote, not proof** — but when we ran these three, the System arm cost **more in $ and
+wall-clock every time, for identical correctness** ([`FINDINGS.md`](FINDINGS.md)). On a single-context task
+that's the expected result: dispatch adds round-trips and an isolation tax, with no first-pass failure for its
+review gate to catch. The kit's edge, *if it exists for you*, is most likely to surface where these three
+tasks **couldn't** test it — a task **too big for one context**, or one that **fans out into genuinely
+independent pieces**. `SELF QUALITY` is self-rated and not comparable across arms — lean on acceptance, rework
+rounds, cost, and time. And remember the perception trap: *feeling* faster is not *being* faster. For a real
+signal, repeat across several varied tasks — especially the big or parallel ones.
 
 `result-*.md` files are git-ignored — they're your local measurements, not part of the kit.

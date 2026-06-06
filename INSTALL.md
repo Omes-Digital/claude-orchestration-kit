@@ -55,7 +55,7 @@ cp -r ~/.claude "$HOME/.claude.backup-$(date +%Y%m%d)" 2>/dev/null || true
 # the playbook — if you have NO existing ~/.claude/CLAUDE.md:
 cp CLAUDE.md ~/.claude/CLAUDE.md
 #  - if you DO have one, copy to CLAUDE.orchestration.md and merge the
-#    "## Agent Orchestration" section into your existing file instead.
+#    "## Working model" section into your existing file instead.
 
 mkdir -p ~/.claude/agents       && cp agents/*.md ~/.claude/agents/
 mkdir -p ~/.claude/skills       && cp -r skills/* ~/.claude/skills/
@@ -76,7 +76,7 @@ $claude = Join-Path $HOME '.claude'
 # the playbook — if you have NO existing CLAUDE.md:
 Copy-Item -Force CLAUDE.md (Join-Path $claude 'CLAUDE.md')
 #  - if you DO have one, copy it to CLAUDE.orchestration.md and merge the
-#    "## Agent Orchestration" section into your existing file instead.
+#    "## Working model" section into your existing file instead.
 
 New-Item -ItemType Directory -Force (Join-Path $claude 'agents')       | Out-Null
 Copy-Item -Force agents\*.md (Join-Path $claude 'agents')
@@ -163,19 +163,23 @@ It prints ✓/✗ for each expected file. Add `--all` / `-All` to also check the
 /skills     →  align, dispatch, tdd, diagnose, review-diff, scope-guard, reread-before-edit, verify-and-report listed
 ```
 
-Then try the loop: ask Claude to design something small, then say **"dispatch this"** — it should write a
-strict-mode contract and hand the bounded work to an implementer tier. See the
-[worked example](docs/EXAMPLE.md).
+Then try the loop: `/align` a slightly ambiguous request, watch Claude lock a confirmed brief, then build it
+**in one pass** in-session. (Dispatch is the scaling exception, not the default — see the
+[worked example](docs/EXAMPLE.md) and [`ab-test/FINDINGS.md`](ab-test/FINDINGS.md).)
 
 ## How it's meant to be used
 
-1. **Align first.** For anything ambiguous, `/align` nails down the brief before any work.
-2. **Design on your strongest model.** Keep the architect session for design, contracts, and triage.
-3. **Dispatch bounded work down.** `dispatch` writes the contract (files · change · deny-list · verify) and
-   picks the tier — `implementer-haiku` for single-file mechanical edits, `implementer-sonnet` for
-   multi-file / cross-file / schema-risk work.
-4. **Review comes back up.** Never let a tier review its own work — `review-diff` / `/code-review` run in
-   the architect session before the human's push moment.
+1. **Align first.** For anything ambiguous, `/align` nails down the brief before any work — the
+   highest-leverage habit.
+2. **Do it in one pass on your strongest model.** For anything that fits one context — most work — build it
+   in-session. We measured this: dispatching it instead cost +14–24% for identical results
+   ([`ab-test/FINDINGS.md`](ab-test/FINDINGS.md)). Lean on `tdd` / `diagnose` as methodology.
+3. **Dispatch only to scale.** When a task is too big for one context, genuinely parallelizable, or wants
+   fresh-eyes review, `dispatch` writes the contract (files · change · deny-list · verify) and picks the
+   tier — `implementer-haiku` for an independent single-file piece, `implementer-sonnet` for a multi-file
+   slice.
+4. **Review before the push moment.** Run `review-diff` / `/code-review` on the diff (and if you dispatched,
+   review comes back *up* a tier — never self-review).
 5. **Memory accrues.** Agents propose durable learnings; you promote keepers into
    `agent-memory/<role>/MEMORY.md`. Keep each file short.
 

@@ -6,6 +6,26 @@ dates matter more than version numbers.
 
 ## [Unreleased]
 
+### Changed — reframed to frontier-first (measured)
+- **The kit's core stance flipped, on its own evidence.** We ran the `ab-test/` harness (three tasks,
+  greenfield → cross-cutting change in an existing repo); tiered architect→implementer dispatch cost
+  **+14–24% and ~2× the wall-clock for identical correctness** every time, and the two-stage review gate
+  caught nothing. So `CLAUDE.md` now leads **frontier-first** — do the work yourself, in one pass, on the
+  strongest model — and reserves orchestration for tasks that are **too big for one context**, **genuinely
+  parallelizable**, or want **fresh-eyes** review. Full write-up + honest caveats in
+  [`ab-test/FINDINGS.md`](ab-test/FINDINGS.md) (new).
+- `CLAUDE.md` — replaced "Agent Orchestration — tier by task weight" with "**Working model — frontier-first;
+  orchestrate only to scale**": a measured cost table, the three scaling gates, and a new "what actually
+  carries the value" section elevating `align`, methodology skills, context hygiene, and memory. Reframed the
+  default play, tier-selection, and the old "dispatch *is* context hygiene" claim (it's a duplication **tax**
+  on existing code, not a free win).
+- `skills/dispatch/` — now **self-gating**: its description and core principle tell the model not to dispatch
+  by reflex — clear the too-big / parallel / fresh-eyes gate first, else keep it in-session on Opus.
+- `skills/align/` — reframed so its value reads as independent of dispatch (a right spec helps a solo pass
+  just as much); flagged as the kit's highest-leverage habit.
+- `README.md` · `START-HERE.md` — headline, core diagram, and Level 3 reframed so orchestration reads as a
+  gated scaling tier, not the destination everyone should reach.
+
 ### Added — orchestrator features
 - Three small **sub-agent skills** for the cheap implementer tier (own skills now total **eight**):
   `scope-guard` (stay inside the contract's file list, escalate clean), `reread-before-edit` (re-read +
