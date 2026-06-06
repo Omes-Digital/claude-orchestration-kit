@@ -24,7 +24,7 @@
 
 **So orchestrate only when it genuinely pays — never by reflex:**
 - **Too big for one context.** The work spans more files/tokens than fit in one session before quality degrades (context rot). *Then* split it and farm out the pieces — the architect stays lean because each sub-agent's reads land in *its* context, not yours. (The one case the A/B did **not** test — all three tasks fit one context. It's the real use; measure it on your own work before trusting it.)
-- **Genuinely parallelizable.** Independent sub-tasks, no shared state, run concurrently for a real wall-clock win — a broad audit, a wide migration, N independent files. Fan-out buys *speed* at *higher* token cost; spend it only when wall-clock matters. (Also untested above — the A/B ran one serial dispatch, which is *why* it was slower.)
+- **Genuinely parallelizable *and the units are heavy*.** Independent sub-tasks, no shared state, each big enough that its work dwarfs the per-unit contract+review cost. Measured (`ab-test/parallel-fanout/`): six *small* independent units fanned out **lost +59% / +47%** — the implement step parallelized ~5.6×, but the architect's serial coordination cost more than just doing them. So fan out *heavy* independent units (a wide migration, N substantial files), never many small ones; it buys *speed* at *higher* token cost.
 - **Fresh-eyes isolation.** An independent critic that hasn't seen your reasoning, for adversarial review of a risky change. Real, but orthogonal to cost.
 
 If none of those hold — and for most single-session features none do — **just do it here, in one pass.** When you *do* orchestrate one of the cases above, route by weight:

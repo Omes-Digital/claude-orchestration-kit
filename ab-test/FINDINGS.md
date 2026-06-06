@@ -6,6 +6,10 @@
 > **frontier-first** (do the work yourself on the strong model) and treats orchestration as an opt-in
 > tool for *scale*, not the everyday default. This page is the evidence — including, honestly, what it
 > does **not** prove.
+>
+> **Update (2026-06-06):** the one case these three couldn't test — genuine *parallel* fan-out — was then
+> built (`parallel-fanout/`) and run. Orchestration **lost there too**: +59% cost, +47% wall-clock on six
+> independent units. See *The fair-shake test* below.
 
 This is the kit measuring itself and publishing the result that went against its own original thesis. If
 you take one thing from this repo, take the habit of measuring instead of assuming.
@@ -66,6 +70,43 @@ Three compounding mechanisms, all visible in the raw `/usage` numbers:
    produce a defect for it to catch. A mechanism that only pays when the first attempt is wrong earns nothing
    when the first attempt is right — which, for a strong model on a one-context task, it was.
 
+## The fair-shake test — parallel fan-out (run 2026-06-06)
+
+The three tasks above all fit one context — the regime *least* favorable to orchestration. So we built a
+fourth task ([`parallel-fanout/`](parallel-fanout/)) to give orchestration its best shot: **six genuinely
+independent formatters**, no shared mutable state. The System arm fans out six agents *in parallel*; Vanilla
+writes all six in one sequential Opus pass. If fan-out ever wins wall-clock, it should win here.
+
+It lost — on every axis:
+
+| Metric | Vanilla (one Opus pass) | System (6 agents, fan-out) | Δ |
+|---|---|---|---|
+| Cost | $1.22 | $1.94 (Opus $1.42 + Haiku $0.51) | **+59%** |
+| **Wall-clock** | **3m56s** | 5m48s | **+47% — slower** |
+| API compute | 2m44s | 8m22s | **3.1×** |
+| Code produced | 292 lines | 823 lines | **2.8×** |
+
+The parallelism actually **worked**: the six implementers ran concurrently and the *implement step*
+compressed **~5.6×** (a ~417 s serial sum → a ~75 s slowest-lane). Parallelism wasn't the problem —
+everything *around* it was:
+
+1. **Coordination is serial *and* per-unit.** The architect writes six contracts up front and reviews six
+   diffs after, one at a time on Opus. That coordination cost **$1.42 in Opus alone — more than Vanilla's
+   *entire* build ($1.22)** — and its serial wall-clock outran the ~75 s the parallelism saved. The cheap
+   Haiku tier ($0.51) was pure addition on top.
+2. **The units were too small to amortize it.** Coordination is ~fixed *per unit* (one contract + one review
+   each), so it grows with N right alongside the work. Fan-out only wins when each unit's work **far exceeds**
+   its per-unit coordination cost — six ~40-line formatters aren't close.
+3. **Isolation duplicated effort.** Six blind agents each re-read the seed and produced **2.8× the code**
+   (823 vs 292 lines; 35 vs 19 tests) — verbose, un-shared, inconsistent. More code for the same six
+   formatters is bloat, not value.
+
+**Refined rule:** parallel fan-out pays only when **each unit's work dwarfs its per-unit coordination
+(contract + review) cost** — independence is necessary but *not sufficient*. The parallelism here was
+flawless and it *still* lost (+59% $, +47% wall-clock), because coordinating six small units cost more than
+just doing them. Untested: a few genuinely *heavy* independent units (each, say, a multi-hour migration),
+where the parallel saving might finally clear the coordination overhead. n=1, as always.
+
 ## What this does **not** prove
 
 This is the honest part, and it cuts both ways. The result above is real, but it is **narrow**. Do not
@@ -76,9 +117,10 @@ read it as "multi-agent orchestration is useless."
 - **Every task fit in one context.** All three sat comfortably inside a single Opus session. The headline
   case *for* orchestration — work **too big for one context** — was therefore **never tested**. That's the
   regime where splitting genuinely keeps each piece (and the architect) lean; we simply didn't measure it.
-- **The dispatch was serial.** We ran one architect → one implementer, in series. **Genuine parallel
-  fan-out** — N independent sub-agents at once for a real wall-clock win — was **never tested** either. The
-  ~2× slowdown is an indictment of *serial* single-dispatch, not of parallelism.
+- **Parallel fan-out *was* then tested — and also lost** (see *The fair-shake test* above: +59% cost, +47%
+  wall-clock on six small independent units, because the serial design+review bookends and per-agent re-read
+  swamp the parallel middle). The narrower case still open: a few *heavy* independent units, where the
+  parallel saving might finally exceed the coordination overhead.
 - **We dispatched *fresh-context* sub-agents.** A **forked** sub-agent (`CLAUDE_CODE_FORK_SUBAGENT`) inherits
   the parent session and *shares its prompt cache* on the first call — removing most of the re-read tax. So
   the penalty measured here is specific to *fresh-context* dispatch; forked dispatch may cost far less, and
@@ -118,6 +160,6 @@ The kit was reframed **frontier-first** (see `CLAUDE.md` §Working model):
 
 Don't take our three runs as gospel — the harness is right here. Follow [`README.md`](README.md): run
 `RUN-system.md` and `RUN-vanilla.md` for a task in two fresh chats, paste `/usage` into each scorecard, then
-`COMPARE.md`. Test it on a task that's genuinely *too big for one context*, or one that *fans out cleanly* —
-those are the cases we couldn't, and they're where orchestration is supposed to earn its keep. If it does on
-your work, that's a finding worth more than this page.
+`COMPARE.md`. We've now covered both ends — one-context work (dispatch lost) and small-unit parallel fan-out
+(lost too). The cases still open: a task genuinely *too big for one context*, or a fan-out of *heavy*
+independent units. If orchestration wins on your work, that's a finding worth more than this page.
