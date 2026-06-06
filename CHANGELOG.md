@@ -47,8 +47,8 @@ dates matter more than version numbers.
   checks them, uninstall removes them.
 - **FINDINGS honesty pass** — `ab-test/FINDINGS.md` now notes the A/B used *fresh-context* dispatch (a forked
   sub-agent shares the parent cache, removing most of the re-read tax) and never tested *Sonnet-solo*.
-- **CLAUDE.md** — trimmed (deduped the cost table into FINDINGS) and added wall-clock levers (`/fast`,
-  `/effort`, lean `Explore` routing) pointing at `docs/EFFICIENCY.md`.
+- **CLAUDE.md** — trimmed (deduped the cost table into FINDINGS) and added wall-clock levers (`/effort low`,
+  lean `Explore` routing) pointing at `docs/EFFICIENCY.md`.
 - **Curated vendored skills (23 → 15)** — pruned the redistributed community skills to a high-signal set
   (dropped 8: duplicates of the kit's own merged supersets, dispatch/review overlaps, and niche skills),
   updating counts + `THIRD_PARTY_LICENSES.md` attribution.
