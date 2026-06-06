@@ -24,7 +24,7 @@ From the repo root:
 ```bash
 # macOS / Linux
 bash install.sh                # core: CLAUDE.md + agents + 8 own skills + memory seeds + scripts
-bash install.sh --all          # also install the 23 vendored community skills
+bash install.sh --all          # also install the 15 vendored community skills
 ```
 ```powershell
 # Windows PowerShell
@@ -182,6 +182,20 @@ Then try the loop: `/align` a slightly ambiguous request, watch Claude lock a co
    review comes back *up* a tier — never self-review).
 5. **Memory accrues.** Agents propose durable learnings; you promote keepers into
    `agent-memory/<role>/MEMORY.md`. Keep each file short.
+
+## Going faster (opt-in)
+
+Once you trust the setup, the kit ships an opt-in efficiency profile and guardrails:
+
+- **`settings.efficiency.json`** — copy into `~/.claude/settings.json` for `model: sonnet` (most coding at
+  ~0.6× Opus and faster; `/model opus` to escalate for hard design), `acceptEdits` + a narrow
+  `permissions.allow` (far fewer permission stops), and the `no-destructive-git` hook wired in as a safety net.
+- **`hooks/`** — `no-destructive-git.sh` (blocks force-push / `reset --hard` / `clean -fd`) and
+  `auto-format.sh`. The installer drops them at `~/.claude/hooks/`; wire them per
+  [`hooks/README.md`](hooks/README.md).
+
+Full evidence + the lever menu (caching, model routing, round-trips, context rot) is in
+[`docs/EFFICIENCY.md`](docs/EFFICIENCY.md).
 
 ## Uninstall
 

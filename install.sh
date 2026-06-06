@@ -3,7 +3,7 @@
 # install.sh — install the Claude Code Agent Orchestration Kit into ~/.claude
 #
 #   bash install.sh                 core: CLAUDE.md + agents + 8 own skills + memory seeds + scripts
-#   bash install.sh --with-vendor   also install the 23 vendored community skills
+#   bash install.sh --with-vendor   also install the 15 vendored community skills
 #   bash install.sh --all           everything (same as --with-vendor)
 #   bash install.sh --check         doctor mode: report what's installed, change nothing
 #   bash install.sh --uninstall     preview which kit files would be removed (dry run)
@@ -33,7 +33,7 @@ Install the Claude Code Agent Orchestration Kit into your ~/.claude folder.
 Usage: bash install.sh [options]
 
   (no options)    core: CLAUDE.md + implementer agents + 8 own skills + memory seeds + scripts
-  --with-vendor   also install the 23 vendored community skills
+  --with-vendor   also install the 15 vendored community skills
   --all           everything (same as --with-vendor)
   --check         doctor mode: report what's installed, change nothing
   --uninstall     preview the kit files that would be removed (dry run; add --yes to delete)
@@ -73,8 +73,9 @@ if [ "$CHECK" -eq 1 ]; then
   done
   if [ -e "$TARGET/agent-memory/README.md" ]; then ok "agent-memory/"; else bad "agent-memory/"; fi
   if [ -e "$TARGET/scripts/statusline.sh" ]; then ok "scripts/ (statusline)"; else bad "scripts/ (statusline)"; fi
+  if [ -e "$TARGET/hooks/no-destructive-git.sh" ]; then ok "hooks/ (guardrails)"; else bad "hooks/ (guardrails)"; fi
   if [ "$WITH_VENDOR" -eq 1 ]; then
-    for s in caveman grill-me test-driven-development; do
+    for s in caveman grill-me to-issues; do
       if [ -e "$TARGET/skills/$s/SKILL.md" ]; then ok "vendored skills/$s"; else bad "vendored skills/$s"; fi
     done
   fi
@@ -126,6 +127,10 @@ if [ "$UNINSTALL" -eq 1 ]; then
   # scripts
   remove_path "scripts/statusline.sh"
   remove_path "scripts/statusline.ps1"
+  # hooks
+  remove_path "hooks/no-destructive-git.sh"
+  remove_path "hooks/auto-format.sh"
+  remove_path "hooks/README.md"
   # agent-memory (you may have curated this)
   remove_path "agent-memory" "may hold notes you curated — a copy is in .kit-backup-* if you used the installer"
   # CLAUDE.md — remove ONLY the kit's unchanged copy; keep a customized/merged one
@@ -140,7 +145,7 @@ if [ "$UNINSTALL" -eq 1 ]; then
 
   # tidy now-empty dirs we own (rmdir only succeeds if empty, so your files are safe)
   if [ "$ASSUME_YES" -eq 1 ]; then
-    rmdir "$TARGET/scripts" "$TARGET/agents" 2>/dev/null || true
+    rmdir "$TARGET/scripts" "$TARGET/hooks" "$TARGET/agents" 2>/dev/null || true
   fi
 
   echo ""
@@ -217,6 +222,13 @@ cp -R "$SRC/scripts/." "$TARGET/scripts/"
 chmod +x "$TARGET"/scripts/*.sh 2>/dev/null || true
 echo "  • scripts/ (statusline meter — opt-in; enable per INSTALL.md §2)"
 
+# hooks — opt-in deterministic guardrails (no-destructive-git, auto-format)
+backup_if_exists "hooks"
+mkdir -p "$TARGET/hooks"
+cp -R "$SRC/hooks/." "$TARGET/hooks/"
+chmod +x "$TARGET"/hooks/*.sh 2>/dev/null || true
+echo "  • hooks/ (git guardrail + auto-format — opt-in; wire per hooks/README.md)"
+
 # vendored skills (optional)
 if [ "$WITH_VENDOR" -eq 1 ]; then
   count=0
@@ -236,5 +248,5 @@ echo "Done. Next steps:"
 echo "  1. Restart Claude Code (it reads ~/.claude at startup)."
 echo "  2. Run  /skills  and  /agents  to confirm they loaded."
 echo "  3. New here? Read START-HERE.md.  Verify anytime with:  bash install.sh --check"
-[ "$WITH_VENDOR" -eq 0 ] && echo "  (Tip: add --all to also install the 23 vendored community skills.)"
+[ "$WITH_VENDOR" -eq 0 ] && echo "  (Tip: add --all to also install the 15 vendored community skills.)"
 exit 0

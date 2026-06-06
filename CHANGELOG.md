@@ -26,6 +26,25 @@ dates matter more than version numbers.
 - `README.md` · `START-HERE.md` — headline, core diagram, and Level 3 reframed so orchestration reads as a
   gated scaling tier, not the destination everyone should reach.
 
+### Added — efficiency pass (evidence-based, measured)
+- `docs/EFFICIENCY.md` (new) — the durable artifact from an A/B-grounded research pass: separates the three
+  goals (real $ / wall-clock / quality), a ranked lever menu, and the kit's measured ~6,500-token always-on
+  footprint with the caching nuance (cached prefix → 0.1×, so trimming is a *quality/headroom* win, not a $ one).
+- **Session-model routing** — CLAUDE.md now says "strongest" ≠ "always Opus": Sonnet for most coding
+  (~0.6× Opus, faster), Opus for hard design, Haiku for mechanical. Ships `settings.efficiency.json`
+  (`model: sonnet` + `acceptEdits` + a narrow `permissions.allow`, guarded by the git hook).
+- **Hooks** — new `hooks/`: `no-destructive-git.sh` (PreToolUse — *deterministically* blocks force-push /
+  `reset --hard` / `clean -fd` / catastrophic `rm`, turning the strict-mode rule into a hard guarantee) and
+  `auto-format.sh` (PostToolUse — saves a format round-trip; optional). Installers copy + chmod them, doctor
+  checks them, uninstall removes them.
+- **FINDINGS honesty pass** — `ab-test/FINDINGS.md` now notes the A/B used *fresh-context* dispatch (a forked
+  sub-agent shares the parent cache, removing most of the re-read tax) and never tested *Sonnet-solo*.
+- **CLAUDE.md** — trimmed (deduped the cost table into FINDINGS) and added wall-clock levers (`/fast`,
+  `/effort`, lean `Explore` routing) pointing at `docs/EFFICIENCY.md`.
+- **Curated vendored skills (23 → 15)** — pruned the redistributed community skills to a high-signal set
+  (dropped 8: duplicates of the kit's own merged supersets, dispatch/review overlaps, and niche skills),
+  updating counts + `THIRD_PARTY_LICENSES.md` attribution.
+
 ### Added — orchestrator features
 - Three small **sub-agent skills** for the cheap implementer tier (own skills now total **eight**):
   `scope-guard` (stay inside the contract's file list, escalate clean), `reread-before-edit` (re-read +

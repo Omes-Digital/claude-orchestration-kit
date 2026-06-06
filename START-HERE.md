@@ -100,8 +100,9 @@ claude-orchestration-kit/
 ├── agents/ ............. 2 helper agents Claude hands work to (Level 3)
 ├── agent-memory/ ....... per-role notes that persist between sessions
 ├── scripts/ ........... opt-in status line: live context % + a /compact nudge
-├── vendor/ ............. 23 more skills from the community (MIT, optional)
-└── docs/ ............... GLOSSARY · SKILL-CHEATSHEET · EXAMPLE · FAQ
+├── hooks/ ............. opt-in guardrails: block destructive git + auto-format (wire per hooks/README)
+├── vendor/ ............. 15 more skills from the community (MIT, optional)
+└── docs/ ............... GLOSSARY · SKILL-CHEATSHEET · EXAMPLE · FAQ · EFFICIENCY
 ```
 
 <!-- SCREENSHOT: terminal showing `/skills` listing the installed skills after running install.sh.
@@ -115,5 +116,6 @@ claude-orchestration-kit/
 | Know which skill to use when | [docs/SKILL-CHEATSHEET.md](docs/SKILL-CHEATSHEET.md) |
 | See a real session end-to-end | [docs/EXAMPLE.md](docs/EXAMPLE.md) |
 | Fix a setup problem | [docs/FAQ.md](docs/FAQ.md) |
+| Make it cheaper / faster | [docs/EFFICIENCY.md](docs/EFFICIENCY.md) |
 | Do the full install | [INSTALL.md](INSTALL.md) |
 | Understand the design | [README.md](README.md) |

@@ -79,6 +79,14 @@ read it as "multi-agent orchestration is useless."
 - **The dispatch was serial.** We ran one architect → one implementer, in series. **Genuine parallel
   fan-out** — N independent sub-agents at once for a real wall-clock win — was **never tested** either. The
   ~2× slowdown is an indictment of *serial* single-dispatch, not of parallelism.
+- **We dispatched *fresh-context* sub-agents.** A **forked** sub-agent (`CLAUDE_CODE_FORK_SUBAGENT`) inherits
+  the parent session and *shares its prompt cache* on the first call — removing most of the re-read tax. So
+  the penalty measured here is specific to *fresh-context* dispatch; forked dispatch may cost far less, and
+  is **untested**. (See [`../docs/EFFICIENCY.md`](../docs/EFFICIENCY.md) §8.)
+- **We never tested Sonnet-solo.** The arms differed in *implementation* model (Opus-solo vs Opus-architect +
+  Sonnet-implementer), but neither was a **single Sonnet pass** — which, at ~0.6× Opus's price and faster,
+  may beat *both* on everyday work. The biggest efficiency lever (which single model) sits outside what this
+  A/B measured.
 - **No first-pass failure occurred, so the review gate was never exercised.** On a genuinely hard or
   error-prone task where a single pass *does* slip, fresh-eyes review and an independent verifier could pay
   for themselves. We didn't generate that failure, so we can't claim the gate is worthless — only that it

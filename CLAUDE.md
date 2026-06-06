@@ -16,17 +16,11 @@
 
 ## Working model — frontier-first; orchestrate only to scale
 
-**Default: do the work yourself, in this session, on the strongest model you have.** A capable frontier model (Opus) holds a normal task — including a cross-cutting change across an existing multi-file codebase — in one context and gets it right in a single pass. Spend your tokens on *doing the task well*, not on the machinery of handing it off.
+**Default: do the work yourself, in this session, on the strongest model you have.** A capable frontier model holds a normal task — including a cross-cutting change across an existing multi-file codebase — in one context and gets it right in a single pass. Spend your tokens on *doing the task well*, not on the machinery of handing it off.
 
-**This kit measured its own dispatch, and on everyday work it lost.** We ran the bundled `ab-test/` harness on three tasks — a greenfield warm-up, a complex parser, and a cross-cutting change to an *existing* repo (the regime tiering is supposedly built for). Every time, routing the bounded implementation down to a cheaper sub-agent cost **more money and ~2× the wall-clock for identical correctness** — both arms passed, zero rework, zero regressions, no dropped layers:
+**"Strongest" ≠ "always Opus."** Opus is only ~1.67× Sonnet's price ($5/$25 vs $3/$15) and slower; for *most* coding the right single pass is **Sonnet**, with Opus reserved for genuinely hard design and Haiku for mechanical edits. Default the session to Sonnet and `/model opus` to escalate (the kit ships an opt-in `settings.efficiency.json`). Frontier-first means the *right* model in one pass, not the priciest — full evidence + levers in [`docs/EFFICIENCY.md`](docs/EFFICIENCY.md). (When you *do* orchestrate hard or big work, the architect role still wants Opus — the tier table below.)
 
-| Task | Vanilla (one Opus pass) | Kit (architect → sub-agent) | Δ cost | Δ API time |
-|---|---|---|---|---|
-| Expense tracker (greenfield) | $0.87 | $0.99 | **+14%** | 2m06s → 3m58s |
-| Calc language (complex parser) | $1.09 | $1.25 | **+15%** | 2m41s → 4m53s |
-| Due-dates in an existing repo (cross-cutting) | $2.19 | $2.71 | **+24%** | 5m09s → 10m07s |
-
-The overhead *grows* toward existing-code work because of an **isolation tax**: the sub-agent re-reads files the architect already loaded (on the cross-cutting task the Sonnet implementer re-read the whole repo — 1.1M cache tokens *on top of* the architect's 1.3M). You pay Opus to design **and** review, **and** a second model to re-read **and** implement — strictly more than Opus doing it once. The two-stage review gate caught nothing, because a single frontier pass didn't fail. Full write-up + caveats: [`ab-test/FINDINGS.md`](ab-test/FINDINGS.md).
+**This kit measured its own dispatch, and on everyday work it lost.** Across three `ab-test/` tasks (greenfield → a cross-cutting change in an *existing* repo), routing the bounded implementation to a cheaper sub-agent cost **+14–24% and ~2× the wall-clock for identical correctness** every time — both arms passed, zero rework. The cause is an **isolation tax**: a sub-agent gets a *fresh* context and re-pays full freight to read what the architect already cached, so you pay one model to design+review **and** another to re-read+implement — strictly more than one pass. The review gate caught nothing, because a single pass didn't fail. Full table + caveats: [`ab-test/FINDINGS.md`](ab-test/FINDINGS.md).
 
 **So orchestrate only when it genuinely pays — never by reflex:**
 - **Too big for one context.** The work spans more files/tokens than fit in one session before quality degrades (context rot). *Then* split it and farm out the pieces — the architect stays lean because each sub-agent's reads land in *its* context, not yours. (The one case the A/B did **not** test — all three tasks fit one context. It's the real use; measure it on your own work before trusting it.)
@@ -105,6 +99,7 @@ Frontier context is re-processed **every turn**, so a bloated architect session 
 - **`/clear` at a clean boundary** beats `/compact` when the next task shares nothing with the last — a full reset is cheaper than carrying a summary.
 - **Dispatch is context hygiene *only at scale*.** Routing a *large, self-contained* slice to a sub-agent keeps its reads out of your context. But for small or existing-code work it backfires — the sub-agent re-reads the repo you already loaded, so you pay for that context twice (measured in `ab-test/`). Isolate to scale, not by reflex.
 - **Optional live meter.** Enable the kit's status line (`scripts/statusline.sh` / `statusline.ps1`): it shows `ctx NN% · Nk` and turns yellow with a `/compact` nudge. Defaults are **model-aware window %** — the Opus architect nudges earlier than the cheaper implementer tiers (**Opus 40%**, other models **60%**). Note % is window-relative: 40% is ~80k tokens on a 200k model but ~400k on a 1M-context one (so a big-window Opus gets lots of headroom before it warns). To cap by absolute size instead, set `KIT_COMPACT_TOKENS` (off by default); override the percent with `KIT_COMPACT_AT`. Opt-in — see `INSTALL.md` §2.
+- **Beyond context — the full efficiency menu.** Token cost and wall-clock have *separate* levers: run the session on **Sonnet** by default (Opus only for hard design), cut permission round-trips with the opt-in `settings.efficiency.json` (`acceptEdits` + a narrow allow-list, guarded by the `no-destructive-git` hook), reach for **`/effort low`** on simple tasks (less thinking → faster), and route codebase research through the lean **`Explore`** agent (it skips CLAUDE.md+git). Evidence + numbers: [`docs/EFFICIENCY.md`](docs/EFFICIENCY.md).
 
 ### Agent memory & self-improvement
 

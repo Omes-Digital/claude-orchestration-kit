@@ -120,8 +120,11 @@ description. The [cheat-sheet](SKILL-CHEATSHEET.md) lists what each one is for.
 Those are **vendored** skills. Install them (`--all` or `--with-vendor`). Without them `align` still runs —
 those steps just no-op.
 
-### Two skills seem to do the same thing (e.g. `tdd` and `test-driven-development`)
-Intentional. The bundled one is a merged superset of the community versions. Prefer the bundled skill.
+### A bundled skill and a community one look similar
+The kit pruned the exact duplicates (e.g. an older `test-driven-development` that `tdd` supersedes). Any
+overlap that remains is intentional and different in angle — e.g. `review-diff` (a rubric you reason with) vs
+`requesting-code-review` / `receiving-code-review` (how to ask for and act on a review). Prefer the bundled
+skill when in doubt.
 
 ## Still stuck?
 Open an issue on the repo, or read the source — every skill is a plain-English `SKILL.md` you can inspect.

@@ -22,12 +22,14 @@ The honest idea (we measured it): for any task a strong model holds in one conte
 | `skills/review-diff/` | Multi-axis code-review rubric with a confidence gate. |
 | `skills/scope-guard/` · `reread-before-edit/` · `verify-and-report/` | Three small sub-agent disciplines for the implementer tier: stay in-contract & escalate clean, land edits on the right bytes, close with verbatim evidence. |
 | `scripts/statusline.sh` · `statusline.ps1` | Opt-in status line: live context-window % with a `/compact` nudge past a threshold. |
+| `hooks/` | Opt-in deterministic hooks: `no-destructive-git.sh` (blocks force-push / `reset --hard` / `clean -fd`) and `auto-format.sh`. |
 | `agent-memory/` | Pre-seeded per-role global memory (`architect`, `explorer`, `researcher`, `implementer`, `reviewer`, `auditor`, `memory-curator`) + the framework README. |
-| `vendor/mattpocock/` | 9 skills vendored unmodified from [`mattpocock/skills`](https://github.com/mattpocock/skills) (MIT). |
-| `vendor/superpowers/` | 14 skills vendored unmodified from [`obra/superpowers`](https://github.com/obra/superpowers) (MIT). |
+| `vendor/mattpocock/` | 8 skills vendored unmodified from [`mattpocock/skills`](https://github.com/mattpocock/skills) (MIT). |
+| `vendor/superpowers/` | 7 skills vendored unmodified from [`obra/superpowers`](https://github.com/obra/superpowers) (MIT). |
 | `install.sh` / `install.ps1` | One-command installers (macOS/Linux · Windows) with backup, doctor (`--check`), and `--all`. |
 | `settings.example.json` | Beginner-safe `~/.claude/settings.json` baseline. |
-| `START-HERE.md` · `docs/` | Beginner on-ramp: glossary, skill cheat-sheet, worked example, FAQ. |
+| `settings.efficiency.json` | Opt-in power profile: Sonnet default, `acceptEdits`, narrow allow-list, git guardrail hook. |
+| `START-HERE.md` · `docs/` | Beginner on-ramp: glossary, skill cheat-sheet, worked example, FAQ, efficiency guide. |
 | `ab-test/` | A self-run A/B harness to measure the kit vs a vanilla session on the same task (cost · speed · quality). We ran it — the results [reframed this kit](ab-test/FINDINGS.md). Honest by design — see [`ab-test/README.md`](ab-test/README.md). |
 
 > The `vendor/` skills are third-party MIT-licensed work redistributed with their original
@@ -93,6 +95,7 @@ Full details, manual steps, and Windows notes are in [`INSTALL.md`](INSTALL.md).
 | [docs/SKILL-CHEATSHEET.md](docs/SKILL-CHEATSHEET.md) | "I want to… → use this skill" |
 | [docs/EXAMPLE.md](docs/EXAMPLE.md) | A real session, narrated end-to-end |
 | [docs/FAQ.md](docs/FAQ.md) | Setup snags, cost/model/permission questions |
+| [docs/EFFICIENCY.md](docs/EFFICIENCY.md) | Make it cheaper & faster — evidence-based cost/wall-clock levers |
 
 ## Design notes / credits
 

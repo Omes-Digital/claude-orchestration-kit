@@ -1,6 +1,6 @@
 # Skill cheat-sheet — "I want to… → use this"
 
-23 + 8 skills is a lot. Here's how to pick one. **Bundled** skills are in `skills/` (installed by default).
+15 + 8 skills is a lot. Here's how to pick one. **Bundled** skills are in `skills/` (installed by default).
 **Vendored** skills are in `vendor/` (install with `--with-vendor` / `-WithVendor`, or copy individually —
 see [INSTALL.md](../INSTALL.md)). Trigger any skill by typing `/its-name`, or just describe your goal and
 Claude usually picks the right one.
@@ -34,7 +34,6 @@ Claude usually picks the right one.
 | Have Claude interrogate my plan for holes | `grill-me` | vendor (mattpocock) |
 | Stress-test a plan against my project's docs/domain | `grill-with-docs` | vendor (mattpocock) |
 | Try a throwaway prototype before committing | `prototype` | vendor (mattpocock) |
-| Step back and reconsider the approach | `zoom-out` | vendor (mattpocock) |
 | Turn a discussion into a written plan | `writing-plans` | vendor (superpowers) |
 | Brainstorm options | `brainstorming` | vendor (superpowers) |
 | Break a plan into trackable issues | `to-issues` | vendor (mattpocock) |
@@ -45,10 +44,9 @@ Claude usually picks the right one.
 | Goal | Skill | Source |
 |---|---|---|
 | Scale work too big for one session / fan out independent pieces | `dispatch` | bundled |
-| Build/fix test-first | `tdd` or `test-driven-development` | bundled / vendor |
-| Debug methodically | `diagnose` or `systematic-debugging` | bundled / vendor |
+| Build/fix test-first | `tdd` | bundled |
+| Debug methodically | `diagnose` | bundled |
 | Run independent work in parallel safely | `dispatching-parallel-agents`, `using-git-worktrees` | vendor (superpowers) |
-| Execute an agreed plan step by step | `executing-plans`, `subagent-driven-development` | vendor (superpowers) |
 | Improve a codebase's architecture | `improve-codebase-architecture` | vendor (mattpocock) |
 
 > **Sub-agent disciplines** — these three are for the *implementer tier* (Claude reaches for them while
@@ -64,7 +62,7 @@ Claude usually picks the right one.
 | Goal | Skill | Source |
 |---|---|---|
 | Review a diff against a rubric | `review-diff` | bundled |
-| Confirm a change actually works (run it) | `verify`, `verification-before-completion` | built-in / vendor |
+| Confirm a change actually works (run it) | `verify` | built-in |
 | Ask for / respond to a code review | `requesting-code-review`, `receiving-code-review` | vendor (superpowers) |
 | Wrap up a branch cleanly | `finishing-a-development-branch` | vendor (superpowers) |
 
@@ -74,8 +72,7 @@ Claude usually picks the right one.
 | Keep the session lean / watch context % | `/compact` at breakpoints + the opt-in `scripts/statusline.sh` meter | built-in / bundled |
 | Cut token use ~75% (terse mode) | `caveman` | vendor (mattpocock) |
 | Compress the session into a hand-off doc | `handoff` | vendor (mattpocock) |
-| Write a brand-new skill | `write-a-skill` / `writing-skills` | vendor (mattpocock / superpowers) |
-| Learn what skills are available | `using-superpowers` | vendor (superpowers) |
+| Write a brand-new skill | `write-a-skill` | vendor (mattpocock) |
 
 ## Notes
 - **Built-in** = ships with Claude Code itself, no install needed.
@@ -83,5 +80,5 @@ Claude usually picks the right one.
 - **Vendored** = in `vendor/`, install with `--with-vendor` (see [INSTALL.md](../INSTALL.md)).
 - `align`'s flow uses `dispatch`, `caveman`, and `grill-me` — install those for the full chain (the
   default `--all` install covers them).
-- Some bundled skills overlap a vendored one on purpose (e.g. `tdd` vs `test-driven-development`); the
-  bundled ones are merged supersets — prefer them.
+- The kit's bundled skills are merged supersets; the exact community duplicates (e.g. an older
+  `test-driven-development`) were pruned from `vendor/`. Prefer the bundled skill.

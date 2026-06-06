@@ -3,7 +3,7 @@
 # install.ps1 — install the Claude Code Agent Orchestration Kit into ~/.claude
 #
 #   pwsh -File install.ps1                core: CLAUDE.md + agents + 8 own skills + memory seeds + scripts
-#   pwsh -File install.ps1 -WithVendor    also install the 23 vendored community skills
+#   pwsh -File install.ps1 -WithVendor    also install the 15 vendored community skills
 #   pwsh -File install.ps1 -All           everything (same as -WithVendor)
 #   pwsh -File install.ps1 -Check         doctor mode: report what's installed, change nothing
 #   pwsh -File install.ps1 -Uninstall     preview which kit files would be removed (dry run)
@@ -37,7 +37,7 @@ Install the Claude Code Agent Orchestration Kit into your ~/.claude folder.
 Usage: pwsh -File install.ps1 [options]
 
   (no options)   core: CLAUDE.md + implementer agents + 8 own skills + memory seeds + scripts
-  -WithVendor    also install the 23 vendored community skills
+  -WithVendor    also install the 15 vendored community skills
   -All           everything (same as -WithVendor)
   -Check         doctor mode: report what's installed, change nothing
   -Uninstall     preview the kit files that would be removed (dry run; add -Yes to delete)
@@ -68,8 +68,9 @@ if ($Check) {
   }
   if (Test-Path (Join-Path $Target 'agent-memory/README.md')) { Ok "agent-memory/" } else { Bad "agent-memory/" }
   if (Test-Path (Join-Path $Target 'scripts/statusline.ps1')) { Ok "scripts/ (statusline)" } else { Bad "scripts/ (statusline)" }
+  if (Test-Path (Join-Path $Target 'hooks/no-destructive-git.sh')) { Ok "hooks/ (guardrails)" } else { Bad "hooks/ (guardrails)" }
   if ($WithVendor) {
-    foreach ($s in @('caveman','grill-me','test-driven-development')) {
+    foreach ($s in @('caveman','grill-me','to-issues')) {
       if (Test-Path (Join-Path $Target "skills/$s/SKILL.md")) { Ok "vendored skills/$s" } else { Bad "vendored skills/$s" }
     }
   }
@@ -113,6 +114,9 @@ if ($Uninstall) {
   Remove-KitPath "agents/implementer-haiku.md" $null
   Remove-KitPath "scripts/statusline.sh" $null
   Remove-KitPath "scripts/statusline.ps1" $null
+  Remove-KitPath "hooks/no-destructive-git.sh" $null
+  Remove-KitPath "hooks/auto-format.sh" $null
+  Remove-KitPath "hooks/README.md" $null
   Remove-KitPath "agent-memory" "may hold notes you curated — a copy is in .kit-backup-* if you used the installer"
 
   $claudeTarget = Join-Path $Target 'CLAUDE.md'
@@ -127,7 +131,7 @@ if ($Uninstall) {
   Remove-KitPath "CLAUDE.orchestration.md" $null
 
   if ($Yes) {
-    foreach ($d in @('scripts','agents')) {
+    foreach ($d in @('scripts','hooks','agents')) {
       $dp = Join-Path $Target $d
       if ((Test-Path $dp) -and -not (Get-ChildItem -Force $dp)) { Remove-Item -Force $dp }
     }
@@ -217,6 +221,16 @@ Get-ChildItem (Join-Path $Src 'scripts') | ForEach-Object {
 }
 Write-Host "  - scripts/ (statusline meter — opt-in; enable per INSTALL.md §2)"
 
+# hooks — opt-in deterministic guardrails (no-destructive-git, auto-format)
+Backup-IfExists 'hooks'
+New-Item -ItemType Directory -Force -Path (Join-Path $Target 'hooks') | Out-Null
+Get-ChildItem (Join-Path $Src 'hooks') | ForEach-Object {
+  $dest = Join-Path (Join-Path $Target 'hooks') $_.Name
+  if (Test-Path $dest) { Remove-Item -Recurse -Force $dest }
+  Copy-Item -Recurse -Force $_.FullName $dest
+}
+Write-Host "  - hooks/ (git guardrail + auto-format — opt-in; wire per hooks/README.md)"
+
 # vendored skills (optional)
 if ($WithVendor) {
   $count = 0
@@ -236,5 +250,5 @@ Write-Host "Done. Next steps:"
 Write-Host "  1. Restart Claude Code (it reads ~/.claude at startup)."
 Write-Host "  2. Run  /skills  and  /agents  to confirm they loaded."
 Write-Host "  3. New here? Read START-HERE.md.  Verify anytime with:  pwsh -File install.ps1 -Check"
-if (-not $WithVendor) { Write-Host "  (Tip: add -All to also install the 23 vendored community skills.)" }
+if (-not $WithVendor) { Write-Host "  (Tip: add -All to also install the 15 vendored community skills.)" }
 exit 0

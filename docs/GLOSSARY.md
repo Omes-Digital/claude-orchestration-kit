@@ -15,7 +15,7 @@ It reads/writes files, runs commands, and can be personalized via the `~/.claude
 
 **Skill** — a reusable mini-workflow saved as a `SKILL.md` file. You trigger one by typing `/its-name`, or
 Claude picks it automatically when your request matches its description. Think "a saved recipe for a
-recurring task." This kit ships 8 of its own + 23 from the community.
+recurring task." This kit ships 8 of its own + 15 from the community.
 
 **Playbook (`CLAUDE.md`)** — a file of standing instructions Claude reads at the start of every session.
 This kit's `CLAUDE.md` teaches Claude the frontier-first working model below. Putting it in `~/.claude/` makes

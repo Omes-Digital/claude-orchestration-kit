@@ -11,18 +11,15 @@ each is included alongside the skills it covers.
 - **License:** MIT — © 2026 Matt Pocock — see [`vendor/mattpocock/LICENSE`](vendor/mattpocock/LICENSE)
 - **Vendored unmodified** under `vendor/mattpocock/`:
   `grill-with-docs` · `improve-codebase-architecture` · `to-issues` · `triage` ·
-  `zoom-out` · `grill-me` · `caveman` · `write-a-skill` · `handoff`
+  `grill-me` · `caveman` · `write-a-skill` · `handoff`
 
 ## superpowers — `obra/superpowers` (Jesse Vincent)
 
 - **Source:** https://github.com/obra/superpowers
 - **License:** MIT — © 2025 Jesse Vincent — see [`vendor/superpowers/LICENSE`](vendor/superpowers/LICENSE)
 - **Vendored unmodified** under `vendor/superpowers/`:
-  `brainstorming` · `writing-plans` · `executing-plans` · `subagent-driven-development` ·
-  `dispatching-parallel-agents` · `using-git-worktrees` · `test-driven-development` ·
-  `systematic-debugging` · `verification-before-completion` · `requesting-code-review` ·
-  `receiving-code-review` · `finishing-a-development-branch` · `writing-skills` ·
-  `using-superpowers`
+  `brainstorming` · `writing-plans` · `dispatching-parallel-agents` · `using-git-worktrees` ·
+  `requesting-code-review` · `receiving-code-review` · `finishing-a-development-branch`
 
 ## Note on the top-level skills
 
