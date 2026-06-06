@@ -48,6 +48,12 @@ cp -r vendor/superpowers/*/ ~/.claude/skills/   2>/dev/null
 Prefer to track upstream and get updates? Install them as plugins from the source repos instead of
 copying — see each repo's README. Either way, keep the attribution intact (see `THIRD_PARTY_LICENSES.md`).
 
+> **`align` depends on three companion skills.** The `align` skill (in `skills/`) hands off to
+> `dispatch` and invokes `caveman` and `grill-me` as part of its flow. `dispatch` ships in `skills/`;
+> `caveman` and `grill-me` live in `vendor/mattpocock/`. To get the full chain working, install those
+> two vendored skills (or all of them, above). Without them, `align` still runs but its `/caveman` and
+> `grill-me` steps will no-op.
+
 ## 3. Enable Workflows (optional but recommended)
 
 The `dispatch` skill and parallel fan-out lean on the Workflow tool. In `~/.claude/settings.json`:
