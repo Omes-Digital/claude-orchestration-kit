@@ -163,6 +163,7 @@ if [ "$UNINSTALL" -eq 1 ]; then
   remove_path "scripts/statusline.ps1"
   # hooks
   remove_path "hooks/no-destructive-git.sh"
+  remove_path "hooks/no-secrets.sh"
   remove_path "hooks/auto-format.sh"
   remove_path "hooks/README.md"
   # agent-memory (you may have curated this)
@@ -261,7 +262,7 @@ backup_if_exists "hooks"
 mkdir -p "$TARGET/hooks"
 cp -R "$SRC/hooks/." "$TARGET/hooks/"
 chmod +x "$TARGET"/hooks/*.sh 2>/dev/null || true
-echo "  • hooks/ (git guardrail + auto-format — opt-in; wire per hooks/README.md)"
+echo "  • hooks/ (git guardrail + secrets guard + auto-format — opt-in; wire per hooks/README.md)"
 
 # vendored skills (optional)
 if [ "$WITH_VENDOR" -eq 1 ]; then

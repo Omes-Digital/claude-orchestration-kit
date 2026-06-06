@@ -18,7 +18,10 @@
     "PreToolUse": [
       {
         "matcher": "Bash",
-        "hooks": [{ "type": "command", "command": "~/.claude/hooks/no-destructive-git.sh" }]
+        "hooks": [
+          { "type": "command", "command": "~/.claude/hooks/no-destructive-git.sh" },
+          { "type": "command", "command": "~/.claude/hooks/no-secrets.sh" }
+        ]
       }
     ]
   }

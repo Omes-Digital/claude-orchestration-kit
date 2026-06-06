@@ -99,8 +99,8 @@ claude-orchestration-kit/
 ├── skills/ ............. 8 skills you trigger with /name  (align, dispatch, tdd, diagnose, review-diff + 3 implementer helpers)
 ├── agents/ ............. 2 helper agents Claude hands work to (Level 3)
 ├── agent-memory/ ....... per-role notes that persist between sessions
-├── scripts/ ........... opt-in status line: live context % + a /compact nudge
-├── hooks/ ............. opt-in guardrails: block destructive git + auto-format (wire per hooks/README)
+├── scripts/ ........... opt-in status line (context % · $cost · rate-limit %) + gen-checksums (integrity)
+├── hooks/ ............. opt-in guardrails: block destructive git + commit secrets + auto-format (wire per hooks/README)
 ├── vendor/ ............. 15 more skills from the community (MIT, optional)
 └── docs/ ............... GLOSSARY · SKILL-CHEATSHEET · EXAMPLE · FAQ · EFFICIENCY
 ```

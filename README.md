@@ -21,12 +21,13 @@ The honest idea (we measured it): for any task a strong model holds in one conte
 | `skills/diagnose/` | Disciplined root-cause diagnosis loop for hard bugs. |
 | `skills/review-diff/` | Multi-axis code-review rubric with a confidence gate. |
 | `skills/scope-guard/` · `reread-before-edit/` · `verify-and-report/` | Three small sub-agent disciplines for the implementer tier: stay in-contract & escalate clean, land edits on the right bytes, close with verbatim evidence. |
-| `scripts/statusline.sh` · `statusline.ps1` | Opt-in status line: live context-window % with a `/compact` nudge past a threshold. |
-| `hooks/` | Opt-in deterministic hooks: `no-destructive-git.sh` (blocks force-push / `reset --hard` / `clean -fd`) and `auto-format.sh`. |
+| `scripts/statusline.sh` · `statusline.ps1` | Opt-in status line: live context-window %, session `$cost`, and plan rate-limit % — with a `/compact` nudge past a threshold. |
+| `hooks/` | Opt-in deterministic hooks: `no-destructive-git.sh` (blocks force-push / `reset --hard` / `clean -fd`), `no-secrets.sh` (blocks committing keys / tokens / `.env`), and `auto-format.sh`. |
 | `agent-memory/` | Pre-seeded per-role global memory (`architect`, `explorer`, `researcher`, `implementer`, `reviewer`, `auditor`, `memory-curator`) + the framework README. |
 | `vendor/mattpocock/` | 8 skills vendored unmodified from [`mattpocock/skills`](https://github.com/mattpocock/skills) (MIT). |
 | `vendor/superpowers/` | 7 skills vendored unmodified from [`obra/superpowers`](https://github.com/obra/superpowers) (MIT). |
-| `install.sh` / `install.ps1` | One-command installers (macOS/Linux · Windows) with backup, doctor (`--check`), and `--all`. |
+| `install.sh` / `install.ps1` | One-command installers (macOS/Linux · Windows) with backup, doctor (`--check`), integrity `--verify`, and `--all`. |
+| `scripts/gen-checksums.sh` · `SHA256SUMS` | Supply-chain integrity: a manifest of published file hashes that `install.sh --verify` checks a clone against. |
 | `settings.example.json` | Beginner-safe `~/.claude/settings.json` baseline. |
 | `settings.efficiency.json` | Opt-in power profile: Sonnet default, `acceptEdits`, narrow allow-list, git guardrail hook. |
 | `START-HERE.md` · `docs/` | Beginner on-ramp: glossary, skill cheat-sheet, worked example, FAQ, efficiency guide. |

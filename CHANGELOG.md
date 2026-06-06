@@ -6,6 +6,21 @@ dates matter more than version numbers.
 
 ## [Unreleased]
 
+### Added — status-line cost meter, a secrets commit-guard, and install integrity verify
+- **Status line now shows session `$cost` + plan rate-limit %** (`scripts/statusline.sh` · `statusline.ps1`).
+  Reads `cost.total_cost_usd` and `rate_limits.{five_hour,seven_day}.used_percentage` from the status JSON;
+  `KIT_BUDGET_USD` turns the cost **red** past a budget, `KIT_RATELIMIT_WARN` (default 80) turns a window
+  **yellow**. Back-compatible — the segments simply don't render on clients that omit those fields.
+- **`hooks/no-secrets.sh` (new)** — a `PreToolUse` (Bash) guard that blocks a `git commit` which would add
+  private-key blocks, AWS/GitHub/Slack/Google/`sk-` tokens, `.env`/`*.pem`/`id_rsa` files, or non-placeholder
+  `secret=` assignments (exit 2). High-precision: `*.example`/`*.sample`/`*.template` are exempt and
+  `KIT_ALLOW_SECRETS=1` overrides a false positive. Wired in `settings.efficiency.json` beside
+  `no-destructive-git`; documented in `hooks/README.md`.
+- **Install integrity verify** — `scripts/gen-checksums.sh` writes a `SHA256SUMS` manifest over the kit's
+  publishable files; `install.sh --verify` / `install.ps1 -Verify` re-hash a clone and confirm the bytes match
+  what was published (cross-platform: `sha256sum` / `shasum` / `Get-FileHash`). Checksum-only, with an optional
+  `minisign` signature hardening noted in `INSTALL.md`.
+
 ### Changed — reframed to frontier-first (measured)
 - **The kit's core stance flipped, on its own evidence.** We ran the `ab-test/` harness (three tasks,
   greenfield → cross-cutting change in an existing repo); tiered architect→implementer dispatch cost

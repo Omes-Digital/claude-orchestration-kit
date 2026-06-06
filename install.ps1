@@ -149,6 +149,7 @@ if ($Uninstall) {
   Remove-KitPath "scripts/statusline.sh" $null
   Remove-KitPath "scripts/statusline.ps1" $null
   Remove-KitPath "hooks/no-destructive-git.sh" $null
+  Remove-KitPath "hooks/no-secrets.sh" $null
   Remove-KitPath "hooks/auto-format.sh" $null
   Remove-KitPath "hooks/README.md" $null
   Remove-KitPath "agent-memory" "may hold notes you curated — a copy is in .kit-backup-* if you used the installer"
@@ -263,7 +264,7 @@ Get-ChildItem (Join-Path $Src 'hooks') | ForEach-Object {
   if (Test-Path $dest) { Remove-Item -Recurse -Force $dest }
   Copy-Item -Recurse -Force $_.FullName $dest
 }
-Write-Host "  - hooks/ (git guardrail + auto-format — opt-in; wire per hooks/README.md)"
+Write-Host "  - hooks/ (git guardrail + secrets guard + auto-format — opt-in; wire per hooks/README.md)"
 
 # vendored skills (optional)
 if ($WithVendor) {

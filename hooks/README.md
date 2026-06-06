@@ -2,14 +2,15 @@
 
 Hooks are shell commands Claude Code runs at lifecycle points (before/after a tool, etc.). Because
 they run **without a model turn**, they're a cheap way to *enforce* a rule or *save a round-trip* that
-otherwise relies on the model choosing to act. This kit ships two:
+otherwise relies on the model choosing to act. This kit ships three:
 
 | Hook | Event | What it does | Why it helps |
 |---|---|---|---|
 | `no-destructive-git.sh` | `PreToolUse` (Bash) | **Blocks** force-push, `git reset --hard`, `git clean -fd`, and catastrophic `rm -rf /`~`$HOME` (exit 2) | Turns CLAUDE.md's *advisory* "no destructive git" rule into a **hard guarantee** — independent of the model. Essential safety net under the `acceptEdits` efficiency profile. |
+| `no-secrets.sh` | `PreToolUse` (Bash) | **Blocks** a `git commit` that would add private keys, cloud/API tokens, `.env`/`*.pem` files, or non-placeholder `secret=` assignments (exit 2) | Makes "scrub secrets before commit" a **hard guarantee**, not a habit the model must remember. High-precision: `*.example`/`*.sample`/`*.template` are exempt; `export KIT_ALLOW_SECRETS=1` overrides a false positive. |
 | `auto-format.sh` | `PostToolUse` (Edit\|Write) | Best-effort runs your formatter (prettier/black/gofmt/rustfmt) on the edited file | Saves Claude a round-trip re-reading the file to check formatting. **Optional** — it mutates files after each edit. |
 
-Both require [`jq`](https://jqlang.github.io/jq/) (already a kit dependency for the status line).
+All three require [`jq`](https://jqlang.github.io/jq/) (already a kit dependency for the status line).
 
 ## Wiring (verified against the Claude Code hooks schema)
 
@@ -22,7 +23,10 @@ Add a `hooks` block to `~/.claude/settings.json`. The `matcher` is the tool name
     "PreToolUse": [
       {
         "matcher": "Bash",
-        "hooks": [{ "type": "command", "command": "~/.claude/hooks/no-destructive-git.sh" }]
+        "hooks": [
+          { "type": "command", "command": "~/.claude/hooks/no-destructive-git.sh" },
+          { "type": "command", "command": "~/.claude/hooks/no-secrets.sh" }
+        ]
       }
     ],
     "PostToolUse": [
@@ -36,7 +40,7 @@ Add a `hooks` block to `~/.claude/settings.json`. The `matcher` is the tool name
 ```
 
 The bundled [`settings.efficiency.json`](../settings.efficiency.json) already wires the git guardrail
-(the safety half of "go faster"). Add the `auto-format` block only if you want it.
+and the secrets guard (the safety half of "go faster"). Add the `auto-format` block only if you want it.
 
 > **Paths:** the examples assume the hooks live at `~/.claude/hooks/` (where the installer puts them).
 > If `~` isn't expanded in your environment, use an absolute path. Make sure the scripts are executable
