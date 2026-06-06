@@ -33,11 +33,20 @@ pwsh -File install.ps1 -WithVendor   # Windows
 Prefer to track upstream for updates? Install them as plugins from their source repos instead — see
 [INSTALL.md](../INSTALL.md) and [THIRD_PARTY_LICENSES.md](../THIRD_PARTY_LICENSES.md).
 
-### How do I undo the install?
-The installer backs up anything it overwrote into `~/.claude/.kit-backup-<timestamp>/`. To remove the kit:
-delete the skill folders you added under `~/.claude/skills/`, the `~/.claude/agents/implementer-*.md` files,
-`~/.claude/agent-memory/`, and `~/.claude/CLAUDE.md` (or `CLAUDE.orchestration.md`). Restore anything you
-want back from the backup folder.
+### How do I undo the install? / remove the kit completely?
+Run the uninstaller — it **previews first** and only deletes with `--yes`:
+```bash
+bash install.sh --uninstall          # dry run (lists what would go)
+bash install.sh --uninstall --yes    # remove it
+```
+```powershell
+pwsh -File install.ps1 -Uninstall        # dry run
+pwsh -File install.ps1 -Uninstall -Yes   # remove it
+```
+It removes only kit-owned files (own + vendored skills, `implementer-*` agents, `scripts/`, `agent-memory/`,
+and an **unchanged** `CLAUDE.md` — a customized/merged one is kept and flagged). Skills/agents you added
+yourself are never touched, and your `~/.claude/.kit-backup-<timestamp>/` folders stay put for restores.
+Then restart Claude Code. (Prefer manual? Delete those same paths by hand.)
 
 ## Cost & models
 

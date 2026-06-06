@@ -6,6 +6,8 @@
 #   pwsh -File install.ps1 -WithVendor    also install the 23 vendored community skills
 #   pwsh -File install.ps1 -All           everything (same as -WithVendor)
 #   pwsh -File install.ps1 -Check         doctor mode: report what's installed, change nothing
+#   pwsh -File install.ps1 -Uninstall     preview which kit files would be removed (dry run)
+#   pwsh -File install.ps1 -Uninstall -Yes   actually remove the kit's files
 #   pwsh -File install.ps1 -Help          show help
 #
 # Override the target for testing:  $env:CLAUDE_HOME = "C:\tmp\test"; pwsh -File install.ps1
@@ -15,6 +17,8 @@ param(
   [switch]$WithVendor,
   [switch]$All,
   [switch]$Check,
+  [switch]$Uninstall,
+  [switch]$Yes,
   [switch]$Help
 )
 
@@ -36,6 +40,8 @@ Usage: pwsh -File install.ps1 [options]
   -WithVendor    also install the 23 vendored community skills
   -All           everything (same as -WithVendor)
   -Check         doctor mode: report what's installed, change nothing
+  -Uninstall     preview the kit files that would be removed (dry run; add -Yes to delete)
+  -Yes           with -Uninstall, actually remove (otherwise it only previews)
   -Help          show this help
 
 Target folder: $Target
@@ -75,6 +81,66 @@ if ($Check) {
     Write-Host "$($script:missing) item(s) missing — run 'pwsh -File install.ps1' (add -WithVendor for community skills)."
     exit 1
   }
+}
+
+# ---- uninstall mode ----
+if ($Uninstall) {
+  if ($Yes) {
+    Write-Host "Removing the Agent Orchestration Kit from: $Target"
+  } else {
+    Write-Host "Dry run — these kit files WOULD be removed from: $Target"
+    Write-Host "(nothing is deleted yet; re-run with -Yes to actually remove)"
+  }
+  Write-Host ""
+  $script:removed = 0
+  function Remove-KitPath($rel, $note) {
+    $p = Join-Path $Target $rel
+    if (-not (Test-Path $p)) { return }
+    if ($Yes) { Remove-Item -Recurse -Force $p; $line = "  removed    $rel" }
+    else      { $line = "  would rm   $rel" }
+    if ($note) { $line += "   ($note)" }
+    Write-Host $line
+    $script:removed++
+  }
+
+  foreach ($s in $OwnSkills) { Remove-KitPath "skills/$s" $null }
+  foreach ($base in @((Join-Path $Src 'vendor/mattpocock'), (Join-Path $Src 'vendor/superpowers'))) {
+    Get-ChildItem -Directory $base | ForEach-Object {
+      if (Test-Path (Join-Path $_.FullName 'SKILL.md')) { Remove-KitPath "skills/$($_.Name)" $null }
+    }
+  }
+  Remove-KitPath "agents/implementer-sonnet.md" $null
+  Remove-KitPath "agents/implementer-haiku.md" $null
+  Remove-KitPath "scripts/statusline.sh" $null
+  Remove-KitPath "scripts/statusline.ps1" $null
+  Remove-KitPath "agent-memory" "may hold notes you curated — a copy is in .kit-backup-* if you used the installer"
+
+  $claudeTarget = Join-Path $Target 'CLAUDE.md'
+  $claudeSrc    = Join-Path $Src 'CLAUDE.md'
+  if (Test-Path $claudeTarget) {
+    if ((Get-FileHash $claudeTarget).Hash -eq (Get-FileHash $claudeSrc).Hash) {
+      Remove-KitPath "CLAUDE.md" $null
+    } else {
+      Write-Host "  KEEPING    CLAUDE.md   (differs from the kit's — looks customized/merged; remove by hand if you want)"
+    }
+  }
+  Remove-KitPath "CLAUDE.orchestration.md" $null
+
+  if ($Yes) {
+    foreach ($d in @('scripts','agents')) {
+      $dp = Join-Path $Target $d
+      if ((Test-Path $dp) -and -not (Get-ChildItem -Force $dp)) { Remove-Item -Force $dp }
+    }
+  }
+
+  Write-Host ""
+  if ($Yes) {
+    Write-Host "Removed $($script:removed) item(s). Backups (.kit-backup-*) and anything you added yourself were left untouched."
+    Write-Host "Restart Claude Code to drop the kit's skills/agents from the session."
+  } else {
+    Write-Host "$($script:removed) item(s) would be removed. To actually delete:  pwsh -File install.ps1 -Uninstall -Yes"
+  }
+  exit 0
 }
 
 # ---- install helpers ----

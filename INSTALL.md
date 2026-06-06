@@ -178,9 +178,27 @@ strict-mode contract and hand the bounded work to an implementer tier. See the
 
 ## Uninstall
 
-Delete what you added under `~/.claude/`: the skill folders, `agents/implementer-*.md`, `agent-memory/`,
-and `CLAUDE.md` (or `CLAUDE.orchestration.md`). Restore anything you want back from the
-`.kit-backup-<timestamp>/` folder the installer made. Restart Claude Code.
+Changed your mind? The installer can remove exactly what it added — **it previews first and only deletes
+with `--yes`**:
+
+```bash
+bash install.sh --uninstall          # macOS / Linux — dry run: lists what would be removed
+bash install.sh --uninstall --yes    # actually remove
+```
+```powershell
+pwsh -File install.ps1 -Uninstall        # Windows — dry run
+pwsh -File install.ps1 -Uninstall -Yes   # actually remove
+```
+
+It removes only **kit-owned** files: the 8 own skills + the vendored skills it ships, `agents/implementer-*.md`,
+`scripts/`, `agent-memory/`, and `CLAUDE.md`. Safety rails:
+- A `CLAUDE.md` that **differs** from the kit's (i.e. you customized or merged it) is **kept**, with a notice —
+  it won't silently delete your work.
+- Skills or agents **you** added are never touched (it only removes names the kit ships).
+- Your `.kit-backup-<timestamp>/` folders are left in place so you can still restore.
+
+Then **restart Claude Code**. Prefer to do it by hand? Delete the same paths under `~/.claude/` yourself and
+restore anything you want from the backup folder.
 
 ## Notes
 

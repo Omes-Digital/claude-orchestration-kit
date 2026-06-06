@@ -6,6 +6,8 @@
 #   bash install.sh --with-vendor   also install the 23 vendored community skills
 #   bash install.sh --all           everything (same as --with-vendor)
 #   bash install.sh --check         doctor mode: report what's installed, change nothing
+#   bash install.sh --uninstall     preview which kit files would be removed (dry run)
+#   bash install.sh --uninstall --yes   actually remove the kit's files
 #   bash install.sh --help          show help
 #
 # Override the target for testing:  CLAUDE_HOME=/tmp/test bash install.sh
@@ -17,6 +19,8 @@ TARGET="${CLAUDE_HOME:-$HOME/.claude}"
 
 WITH_VENDOR=0
 CHECK=0
+UNINSTALL=0
+ASSUME_YES=0
 BACKUP=""
 
 OWN_SKILLS="align dispatch tdd diagnose review-diff scope-guard reread-before-edit verify-and-report"
@@ -32,6 +36,8 @@ Usage: bash install.sh [options]
   --with-vendor   also install the 23 vendored community skills
   --all           everything (same as --with-vendor)
   --check         doctor mode: report what's installed, change nothing
+  --uninstall     preview the kit files that would be removed (dry run; add --yes to delete)
+  --yes           with --uninstall, actually remove (otherwise it only previews)
   --help          show this help
 
 Target folder: $TARGET
@@ -44,6 +50,8 @@ for arg in "$@"; do
   case "$arg" in
     --with-vendor|--all) WITH_VENDOR=1 ;;
     --check)             CHECK=1 ;;
+    --uninstall)         UNINSTALL=1 ;;
+    --yes|-y)            ASSUME_YES=1 ;;
     -h|--help)           usage; exit 0 ;;
     *) echo "Unknown option: $arg" >&2; usage; exit 2 ;;
   esac
@@ -76,6 +84,71 @@ if [ "$CHECK" -eq 1 ]; then
   else
     echo "$MISSING item(s) missing — run 'bash install.sh' (add --with-vendor for community skills)."
     exit 1
+  fi
+  exit 0
+fi
+
+# ---- uninstall mode ----
+if [ "$UNINSTALL" -eq 1 ]; then
+  if [ "$ASSUME_YES" -eq 1 ]; then
+    echo "Removing the Agent Orchestration Kit from: $TARGET"
+  else
+    echo "Dry run — these kit files WOULD be removed from: $TARGET"
+    echo "(nothing is deleted yet; re-run with --yes to actually remove)"
+  fi
+  echo ""
+  removed=0
+  remove_path() {  # $1 = path relative to TARGET, $2 = optional note
+    p="$TARGET/$1"
+    [ -e "$p" ] || return 0
+    if [ "$ASSUME_YES" -eq 1 ]; then
+      rm -rf "$p"; printf '  removed    %s' "$1"
+    else
+      printf '  would rm   %s' "$1"
+    fi
+    [ -n "${2:-}" ] && printf '   (%s)' "$2"
+    printf '\n'
+    removed=$((removed+1))
+  }
+
+  # own skills
+  for s in $OWN_SKILLS; do remove_path "skills/$s"; done
+  # vendored skills — only the names this kit ships (your own skills are left alone)
+  for base in "$SRC/vendor/mattpocock" "$SRC/vendor/superpowers"; do
+    for dir in "$base"/*/; do
+      [ -f "$dir/SKILL.md" ] || continue
+      remove_path "skills/$(basename "$dir")"
+    done
+  done
+  # implementer agents
+  remove_path "agents/implementer-sonnet.md"
+  remove_path "agents/implementer-haiku.md"
+  # scripts
+  remove_path "scripts/statusline.sh"
+  remove_path "scripts/statusline.ps1"
+  # agent-memory (you may have curated this)
+  remove_path "agent-memory" "may hold notes you curated — a copy is in .kit-backup-* if you used the installer"
+  # CLAUDE.md — remove ONLY the kit's unchanged copy; keep a customized/merged one
+  if [ -e "$TARGET/CLAUDE.md" ]; then
+    if cmp -s "$SRC/CLAUDE.md" "$TARGET/CLAUDE.md"; then
+      remove_path "CLAUDE.md"
+    else
+      echo "  KEEPING    CLAUDE.md   (differs from the kit's — looks customized/merged; remove by hand if you want)"
+    fi
+  fi
+  remove_path "CLAUDE.orchestration.md"
+
+  # tidy now-empty dirs we own (rmdir only succeeds if empty, so your files are safe)
+  if [ "$ASSUME_YES" -eq 1 ]; then
+    rmdir "$TARGET/scripts" "$TARGET/agents" 2>/dev/null || true
+  fi
+
+  echo ""
+  if [ "$ASSUME_YES" -eq 1 ]; then
+    echo "Removed $removed item(s). Backups (.kit-backup-*) and anything you added yourself were left untouched."
+    echo "Restart Claude Code to drop the kit's skills/agents from the session."
+  else
+    echo "$removed item(s) would be removed. To actually delete:  bash install.sh --uninstall --yes"
   fi
   exit 0
 fi

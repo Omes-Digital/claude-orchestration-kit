@@ -17,6 +17,9 @@ dates matter more than version numbers.
   to `~/.claude/scripts/`; enable it in `settings.json` (see `INSTALL.md` §2). Not turned on automatically.
 - `CLAUDE.md` — a "Context hygiene" section: recommend `/compact` at work-cluster breakpoints (not at a
   magic token number the model can't read) to keep the architect session lean.
+- `install.sh --uninstall` / `install.ps1 -Uninstall` — a clean removal path. Dry-run by default (previews
+  the kit-owned files it would delete); `--yes` / `-Yes` actually removes. Keeps a customized/merged
+  `CLAUDE.md`, never touches skills/agents you added yourself, and leaves backups in place.
 
 ### Added — beginner on-ramp
 - `START-HERE.md` — single entry point with a 3-level progressive adoption path (try one skill → add the
